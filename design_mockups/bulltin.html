@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARAM Mayhem Assistant - 公告与版本更新</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="themes.css">
+<style>
+  body { flex-direction: column; gap: 14px; padding-top: 10px; }
+  .theme-switcher-bar {
+    display: flex; gap: 10px; padding: 8px 18px;
+    background: rgba(255,255,255,0.06); border-radius: 24px;
+    backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08);
+  }
+  .theme-btn {
+    padding: 6px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.04); color: #bbb;
+    font-family: var(--font-body); transition: all 0.25s; font-weight: 500;
+  }
+  .theme-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .theme-btn.active { background: var(--accent-primary); color: var(--text-inverse); border-color: var(--accent-primary); font-weight: 700; }
+</style>
+</head>
+<body data-theme="abyssal">
+
+<div class="theme-switcher-bar">
+  <button class="theme-btn active" onclick="setTheme('abyssal',this)">深渊竞技场</button>
+  <button class="theme-btn" onclick="setTheme('luminous',this)">极简辉光</button>
+  <button class="theme-btn" onclick="setTheme('neon',this)">霓虹脉冲</button>
+</div>
+
+<div class="phone-frame">
+
+  <div class="status-bar">
+    <span>9:41</span>
+  </div>
+
+  <div class="content-area">
+
+    <div class="page-header">
+      <h1>公告与版本更新</h1>
+    </div>
+
+    <div class="carousel-container">
+      <div class="carousel-slide">
+        <div>
+          <div class="carousel-title">14.8 版本更新</div>
+          <div class="carousel-subtitle">海克斯大乱斗平衡调整</div>
+        </div>
+      </div>
+      <div class="carousel-dots">
+        <div class="carousel-dot active"></div>
+        <div class="carousel-dot"></div>
+        <div class="carousel-dot"></div>
+      </div>
+    </div>
+
+    <div class="bulletin-card">
+      <span class="bulletin-tag update">UPDATE</span>
+      <div class="bulletin-title">14.8 版本更新说明</div>
+      <div class="bulletin-desc">本次更新带来了12位英雄的ARAM平衡调整，包括布兰德伤害输出从110%降低至105%，萨勒芬妮护盾值削弱15%等关键改动。</div>
+      <div class="bulletin-meta">2026-04-28 · 官方公告</div>
+    </div>
+
+    <div class="bulletin-card">
+      <span class="bulletin-tag nerf">NERF</span>
+      <div class="bulletin-title">布兰德 伤害输出削弱</div>
+      <div class="bulletin-desc">布兰德在ARAM中的伤害输出从110%降低至105%。虽然仍然保持强势，但S+梯级地位受到挑战。</div>
+      <div class="bulletin-meta">2026-04-28</div>
+    </div>
+
+    <div class="bulletin-card">
+      <span class="bulletin-tag buff">BUFF</span>
+      <div class="bulletin-title">雷克塞 全面增强</div>
+      <div class="bulletin-desc">雷克塞的伤害输出提升至110%，承受伤害降低至90%。在14.8版本中获得了显著的全方位加强。</div>
+      <div class="bulletin-meta">2026-04-25</div>
+    </div>
+
+    <div class="bulletin-card">
+      <span class="bulletin-tag update">UPDATE</span>
+      <div class="bulletin-title">14.7 版本回顾：强化符文大改</div>
+      <div class="bulletin-desc">上版本新增3个棱彩强化符文，调整了赌徒套装效果。所有数据已同步更新至最新状态。</div>
+      <div class="bulletin-meta">2026-04-14</div>
+    </div>
+
+    <div class="bulletin-card">
+      <span class="bulletin-tag nerf">NERF</span>
+      <div class="bulletin-title">萨勒芬妮 护盾大幅削弱</div>
+      <div class="bulletin-desc">W技能护盾值在ARAM中降低15%，胜率由51.8%骤降至44.2%。该英雄已被标记为版本陷阱。</div>
+      <div class="bulletin-meta">2026-04-10</div>
+    </div>
+
+    <div style="height:12px;"></div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>首页</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>英雄</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>强化</span>
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>社区</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>我的</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function setTheme(theme, btn) {
+  document.body.setAttribute('data-theme', theme);
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>

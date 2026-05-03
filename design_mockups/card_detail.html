@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARAM Mayhem Assistant - 英雄详情</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="themes.css">
+</head>
+<body data-theme="abyssal">
+
+<div class="theme-switcher">
+  <button class="theme-btn active" onclick="setTheme('abyssal',this)">深渊竞技场</button>
+  <button class="theme-btn" onclick="setTheme('luminous',this)">极简辉光</button>
+  <button class="theme-btn" onclick="setTheme('neon',this)">霓虹脉冲</button>
+</div>
+
+<div class="phone-frame">
+
+  <div class="status-bar">
+    <span>9:41</span>
+    <svg width="24" height="12" viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;">
+      <rect x="0" y="0" width="20" height="11" rx="2" stroke="var(--text-secondary)"/>
+      <rect x="2" y="2" width="14" height="7" rx="1" fill="var(--accent-success)"/>
+      <rect x="21" y="3" width="2.5" height="5" rx="0.5" fill="var(--text-secondary)"/>
+    </svg>
+  </div>
+
+  <div class="content-area">
+
+    <div class="hero-banner fire-theme">
+      <div class="back-btn">&larr;</div>
+      <div>
+        <div class="hero-banner-name">布兰德</div>
+        <div class="hero-banner-sub">复仇焰魂 · S+ 级</div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--accent-success);">53.2%</div>
+        <div class="stat-label">胜率</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">18.5%</div>
+        <div class="stat-label">登场率</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--accent-danger);">12.3%</div>
+        <div class="stat-label">BAN率</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">3.42</div>
+        <div class="stat-label">KDA</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2>⚔ ARAM 平衡修正</h2>
+    </div>
+
+    <div class="bar-chart">
+      <div class="bar-row">
+        <div class="bar-label">伤害输出</div>
+        <div class="bar-track"><div class="bar-fill buff" style="width:75%;"></div></div>
+        <div class="bar-value buff">110%</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">承受伤害</div>
+        <div class="bar-track"><div class="bar-fill nerf" style="width:60%;"></div></div>
+        <div class="bar-value nerf">95%</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">治疗</div>
+        <div class="bar-track"><div class="bar-fill neutral" style="width:65%;"></div></div>
+        <div class="bar-value neutral">100%</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">护盾</div>
+        <div class="bar-track"><div class="bar-fill neutral" style="width:65%;"></div></div>
+        <div class="bar-value neutral">100%</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">韧性</div>
+        <div class="bar-track"><div class="bar-fill buff" style="width:80%;"></div></div>
+        <div class="bar-value buff">120%</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">技能急速</div>
+        <div class="bar-track"><div class="bar-fill neutral" style="width:65%;"></div></div>
+        <div class="bar-value neutral">100%</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2>📖 技能加点推荐</h2>
+    </div>
+
+    <div class="skill-card-row">
+      <div class="skill-card recommended">
+        <div class="skill-code">Q→W→E</div>
+        <div class="skill-stat">登场率 68%</div>
+        <div class="skill-rate" style="color:var(--accent-success);">胜率 54.1%</div>
+        <span class="badge prismatic" style="margin-top:6px;font-size:10px;">推荐</span>
+      </div>
+      <div class="skill-card">
+        <div class="skill-code">W→Q→E</div>
+        <div class="skill-stat">登场率 22%</div>
+        <div class="skill-rate">胜率 51.2%</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-code">E→Q→W</div>
+        <div class="skill-stat">登场率 10%</div>
+        <div class="skill-rate">胜率 48.5%</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2>🗡️ 推荐出装</h2>
+    </div>
+
+    <div class="build-section">
+      <div class="build-label">起始装备</div>
+      <div class="build-row">
+        <div class="item-icon">法书</div>
+        <div class="item-icon">药水</div>
+      </div>
+    </div>
+
+    <div class="build-section">
+      <div class="build-label">核心三件套</div>
+      <div class="build-row">
+        <div class="item-icon">面具</div>
+        <div class="item-icon">冰杖</div>
+        <div class="item-icon">鬼书</div>
+      </div>
+    </div>
+
+    <div class="build-section">
+      <div class="build-label">六神装</div>
+      <div class="build-row">
+        <div class="item-icon">法穿</div>
+        <div class="item-icon">帽子</div>
+        <div class="item-icon">金身</div>
+        <div class="item-icon">宝珠</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2>✨ 推荐强化符文</h2>
+    </div>
+
+    <div class="augment-card prismatic">
+      <div class="augment-header">
+        <div class="augment-icon prismatic">叠</div>
+        <div class="augment-name">叠叠乐</div>
+        <span class="badge prismatic" style="margin-left:auto;">棱彩</span>
+      </div>
+      <div class="augment-desc">每购买一件装备永久增加2%最大生命值</div>
+    </div>
+
+    <div class="augment-card gold">
+      <div class="augment-header">
+        <div class="augment-icon gold">赌</div>
+        <div class="augment-name">赌徒</div>
+        <span class="badge gold" style="margin-left:auto;">黄金</span>
+      </div>
+      <div class="augment-desc">每次刷新商店获得额外金币</div>
+    </div>
+
+    <div class="augment-card silver">
+      <div class="augment-header">
+        <div class="augment-icon silver">钱</div>
+        <div class="augment-name">钱雨</div>
+        <span class="badge silver" style="margin-left:auto;">白银</span>
+      </div>
+      <div class="augment-desc">每回合开始获得额外3金币</div>
+    </div>
+
+    <div style="height:16px;"></div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>首页</span>
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>英雄</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>强化</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>社区</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>我的</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function setTheme(theme, btn) {
+  document.body.setAttribute('data-theme', theme);
+  document.querySelectorAll('.theme-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>

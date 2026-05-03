@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>强度等级说明 - ARAM Mayhem Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@300;400;500&family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="themes.css">
+<style>
+  body { flex-direction: column; gap: 14px; padding-top: 10px; }
+  .theme-switcher-bar {
+    display: flex; gap: 10px; padding: 8px 18px;
+    background: rgba(255,255,255,0.06); border-radius: 24px;
+    backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08);
+  }
+  .theme-btn {
+    padding: 6px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.04); color: #bbb;
+    font-family: var(--font-body); transition: all 0.25s; font-weight: 500;
+  }
+  .theme-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .theme-btn.active { background: var(--accent-primary); color: var(--text-inverse); border-color: var(--accent-primary); font-weight: 700; }
+  .content-area { padding: 0; }
+</style>
+</head>
+<body data-theme="abyssal">
+
+<div class="theme-switcher-bar">
+  <button class="theme-btn active" onclick="setTheme('abyssal',this)">深渊竞技场</button>
+  <button class="theme-btn" onclick="setTheme('luminous',this)">极简辉光</button>
+  <button class="theme-btn" onclick="setTheme('neon',this)">霓虹脉冲</button>
+</div>
+
+<div class="phone-frame">
+
+  <div class="status-bar">
+    <span>9:41</span>
+    <span style="display:flex;gap:4px;">&#9679;&#9679;&#9679;&#9679;&#9679; WiFi &#9651;</span>
+  </div>
+
+  <div class="content-area">
+
+    <div class="page-header">
+      <h1>&#128202; 强度等级说明</h1>
+    </div>
+
+    <div class="explain-card">
+      <div class="tier-header">
+        <span class="badge s-plus">S+</span>
+        <span style="font-weight:700;color:var(--text-primary);font-size:14px;">God Tier &#183; 统治级</span>
+      </div>
+      <div class="tier-desc">胜率 &ge; 53%，在ARAM中具有统治级表现，适合任何阵容和局势。这些英雄即使在非专精玩家手中也能发挥出极高的战斗力。代表英雄：布兰德、婕拉。</div>
+    </div>
+
+    <div class="explain-card">
+      <div class="tier-header">
+        <span class="badge s">S</span>
+        <span style="font-weight:700;color:var(--text-primary);font-size:14px;">顶级 &#183; 强势之选</span>
+      </div>
+      <div class="tier-desc">胜率 51%~52.9%，强度优秀，是ARAM中的主力选择。在合适的阵容搭配下可以主宰比赛。代表英雄：拉克丝、萨勒芬妮。</div>
+    </div>
+
+    <div class="explain-card">
+      <div class="tier-header">
+        <span class="badge a">A</span>
+        <span style="font-weight:700;color:var(--text-primary);font-size:14px;">优秀 &#183; 稳定可靠</span>
+      </div>
+      <div class="tier-desc">胜率 48%~50.9%，表现稳定，是可靠的选择。需要一定的操作熟练度才能发挥最大价值。代表英雄：薇古丝、莫甘娜。</div>
+    </div>
+
+    <div class="explain-card">
+      <div class="tier-header">
+        <span class="badge b">B</span>
+        <span style="font-weight:700;color:var(--text-primary);font-size:14px;">普通 &#183; 需要磨合</span>
+      </div>
+      <div class="tier-desc">胜率 45%~47.9%，表现一般，需要特定阵容或操作支撑。新手慎选，老玩家可在特定阵容中发挥价值。代表英雄：安妮、维迦。</div>
+    </div>
+
+    <div class="explain-card">
+      <div class="tier-header">
+        <span class="badge c">C</span>
+        <span style="font-weight:700;color:var(--text-primary);font-size:14px;">弱势 &#183; 不推荐</span>
+      </div>
+      <div class="tier-desc">胜率 &lt; 45%，在当前版本中较为弱势。除非是本命英雄或特定counter阵容，否则不推荐选择。代表英雄：乐芙兰、瑞兹。</div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="section-header">
+      <h2>&#128202; 数据来源</h2>
+    </div>
+    <div class="page-subtitle">本App数据综合自多个权威数据平台，包括Riot Games官方Data Dragon API、U.GG ARAM数据分析以及社区胜率追踪系统。数据每6小时自动同步一次，确保时效性和准确性。</div>
+
+    <div class="divider"></div>
+
+    <div class="section-header">
+      <h2>&#128260; 更新频率</h2>
+    </div>
+    <div class="page-subtitle">英雄数据每6小时自动更新。版本公告跟随Riot官方补丁节奏（约每2周）。策略社区实时更新，确保玩家始终掌握最新Meta。</div>
+
+    <div class="divider"></div>
+
+    <div class="section-header">
+      <h2>&#9888;&#65039; 关于版本陷阱</h2>
+    </div>
+    <div class="page-subtitle">当英雄或强化符文在新版本中被大幅削弱时（胜率下降超过3%），系统会自动标记为"版本陷阱"，并在相关页面显示醒目的红色警告标识。建议玩家在选择前留意版本陷阱提示，避免使用被大幅削弱的英雄或符文。</div>
+
+    <div style="padding-bottom:16px;"></div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>首页</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>英雄</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>强化</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>社区</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>我的</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function setTheme(theme, btn) {
+  document.body.setAttribute('data-theme', theme);
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>

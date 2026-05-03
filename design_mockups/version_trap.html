@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>版本陷阱预警 - ARAM Mayhem Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@300;400;500&family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="themes.css">
+<style>
+  body { flex-direction: column; gap: 14px; padding-top: 10px; }
+  .theme-switcher-bar {
+    display: flex; gap: 10px; padding: 8px 18px;
+    background: rgba(255,255,255,0.06); border-radius: 24px;
+    backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08);
+  }
+  .theme-btn {
+    padding: 6px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.04); color: #bbb;
+    font-family: var(--font-body); transition: all 0.25s; font-weight: 500;
+  }
+  .theme-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .theme-btn.active { background: var(--accent-primary); color: var(--text-inverse); border-color: var(--accent-primary); font-weight: 700; }
+  .content-area { padding: 0; }
+  .augment-circle {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #fff; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--quality-prismatic-border), var(--quality-gold-border));
+  }
+</style>
+</head>
+<body data-theme="abyssal">
+
+<div class="theme-switcher-bar">
+  <button class="theme-btn active" onclick="setTheme('abyssal',this)">深渊竞技场</button>
+  <button class="theme-btn" onclick="setTheme('luminous',this)">极简辉光</button>
+  <button class="theme-btn" onclick="setTheme('neon',this)">霓虹脉冲</button>
+</div>
+
+<div class="phone-frame">
+
+  <div class="status-bar">
+    <span>9:41</span>
+    <span style="display:flex;gap:4px;">&#9679;&#9679;&#9679;&#9679;&#9679; WiFi &#9651;</span>
+  </div>
+
+  <div class="content-area">
+
+    <div class="page-header">
+      <h1>&#9888;&#65039; 版本陷阱预警</h1>
+    </div>
+    <div class="page-subtitle">以下英雄和符文在14.8版本中被大幅削弱，胜率显著下降，请谨慎选择</div>
+
+    <div class="section-header">
+      <h2>&#128128; 英雄陷阱</h2>
+    </div>
+
+    <div class="hero-card">
+      <div class="hero-avatar light">S</div>
+      <div class="hero-info">
+        <div class="hero-name">萨勒芬妮</div>
+        <div class="hero-title">星籁歌姬</div>
+      </div>
+      <span class="badge b">B</span>
+      <div class="hero-stats">
+        <div class="hero-winrate bad">44.2%</div>
+        <div class="hero-pickrate">8.5%</div>
+      </div>
+    </div>
+    <div class="trap-banner">
+      <div class="warn-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      &#9888; 该英雄在14.8版本护盾值被削弱15%，胜率从51.8%骤降至44.2%，已被降级至B级
+    </div>
+
+    <div class="hero-card">
+      <div class="hero-avatar light">A</div>
+      <div class="hero-info">
+        <div class="hero-name">阿狸</div>
+        <div class="hero-title">九尾妖狐</div>
+      </div>
+      <span class="badge b">B</span>
+      <div class="hero-stats">
+        <div class="hero-winrate bad">45.1%</div>
+        <div class="hero-pickrate">6.2%</div>
+      </div>
+    </div>
+    <div class="trap-banner">
+      <div class="warn-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      &#9888; 该英雄在14.8版本Q技能AP加成削弱，基础伤害降低，胜率持续走低
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="section-header">
+      <h2>&#128302; 符文陷阱</h2>
+    </div>
+
+    <div class="hero-card">
+      <div class="augment-circle">&#9733;</div>
+      <div class="hero-info">
+        <div class="hero-name">终极狩猎</div>
+        <div class="hero-title" style="font-size:10px;">Prismatic &#183; 棱彩符文</div>
+      </div>
+    </div>
+    <div class="trap-banner">
+      <div class="warn-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      &#9888; 该符文在14.8版本大招冷却缩减从20%降至15%，效果大幅削弱
+    </div>
+
+    <div style="padding-bottom:16px;"></div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>首页</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>英雄</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>强化</span>
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>社区</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>我的</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function setTheme(theme, btn) {
+  document.body.setAttribute('data-theme', theme);
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>

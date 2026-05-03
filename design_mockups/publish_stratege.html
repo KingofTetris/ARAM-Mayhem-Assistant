@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARAM Mayhem Assistant - 发布策略</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="themes.css">
+<style>
+  body { flex-direction: column; gap: 14px; padding-top: 10px; }
+  .theme-switcher-bar {
+    display: flex; gap: 10px; padding: 8px 18px;
+    background: rgba(255,255,255,0.06); border-radius: 24px;
+    backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08);
+  }
+  .theme-btn {
+    padding: 6px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.04); color: #bbb;
+    font-family: var(--font-body); transition: all 0.25s; font-weight: 500;
+  }
+  .theme-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .theme-btn.active { background: var(--accent-primary); color: var(--text-inverse); border-color: var(--accent-primary); font-weight: 700; }
+  .btn-primary-wrap { padding: 0 16px; margin-top: 4px; }
+</style>
+</head>
+<body data-theme="abyssal">
+
+<div class="theme-switcher-bar">
+  <button class="theme-btn active" onclick="setTheme('abyssal',this)">深渊竞技场</button>
+  <button class="theme-btn" onclick="setTheme('luminous',this)">极简辉光</button>
+  <button class="theme-btn" onclick="setTheme('neon',this)">霓虹脉冲</button>
+</div>
+
+<div class="phone-frame">
+
+  <div class="status-bar">
+    <span>9:41</span>
+  </div>
+
+  <div class="content-area">
+
+    <div class="page-header">
+      <h1>发布策略</h1>
+    </div>
+
+    <div class="form-group">
+      <span class="form-label">选择英雄</span>
+      <div class="select-trigger">
+        <span class="placeholder">&#x1F50D; 点击搜索英雄...</span>
+      </div>
+      <div class="selected-items">
+        <span class="selected-chip">
+          布兰德
+          <span class="remove">&#x00D7;</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <span class="form-label">选择强化符文</span>
+      <div class="chip-group">
+        <span class="chip">叠叠乐</span>
+        <span class="chip active">赌徒</span>
+        <span class="chip">钱雨</span>
+        <span class="chip active">奥术彗星</span>
+        <span class="chip">先攻</span>
+      </div>
+      <div class="selected-items">
+        <span class="selected-chip">
+          赌徒
+          <span class="remove">&#x00D7;</span>
+        </span>
+        <span class="selected-chip">
+          奥术彗星
+          <span class="remove">&#x00D7;</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <span class="form-label">推荐出装</span>
+      <div class="chip-group">
+        <span class="chip active">卢登的激荡</span>
+        <span class="chip">灭世者的死亡之帽</span>
+        <span class="chip active">影焰</span>
+        <span class="chip">虚空之杖</span>
+        <span class="chip">中娅沙漏</span>
+      </div>
+      <div class="selected-items">
+        <span class="selected-chip">
+          卢登的激荡
+          <span class="remove">&#x00D7;</span>
+        </span>
+        <span class="selected-chip">
+          影焰
+          <span class="remove">&#x00D7;</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <span class="form-label">策略说明</span>
+      <textarea class="form-textarea" rows="5">布兰德在ARAM中推荐主Q副W，优先出卢登和影焰。配合赌徒和奥术彗星两个强化符文，可以在团战中打出极高的AOE伤害...</textarea>
+      <div class="char-count">58/500</div>
+    </div>
+
+    <div class="info-banner">
+      &#x1F4A1; 优质策略更容易被推荐到首页并获得更多点赞
+    </div>
+
+    <div class="btn-primary-wrap">
+      <button class="btn-primary">&#x1F4E4; 发布策略</button>
+    </div>
+
+    <div style="height:12px;"></div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>首页</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>英雄</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>强化</span>
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>社区</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>我的</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function setTheme(theme, btn) {
+  document.body.setAttribute('data-theme', theme);
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>

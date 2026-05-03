@@ -1,0 +1,9 @@
+.trae/*
+!.trae/specs/
+.trae/specs/*
+!.trae/specs/aram-mayhem-assistant-app/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+/secrets

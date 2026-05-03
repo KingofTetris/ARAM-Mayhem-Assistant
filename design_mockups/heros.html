@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARAM Mayhem Assistant - 英雄列表</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="themes.css">
+</head>
+<body data-theme="abyssal">
+
+<div class="theme-switcher">
+  <button class="theme-btn active" onclick="setTheme('abyssal',this)">深渊竞技场</button>
+  <button class="theme-btn" onclick="setTheme('luminous',this)">极简辉光</button>
+  <button class="theme-btn" onclick="setTheme('neon',this)">霓虹脉冲</button>
+</div>
+
+<div class="phone-frame">
+
+  <div class="status-bar">
+    <span>9:41</span>
+    <svg width="24" height="12" viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;">
+      <rect x="0" y="0" width="20" height="11" rx="2" stroke="var(--text-secondary)"/>
+      <rect x="2" y="2" width="14" height="7" rx="1" fill="var(--accent-success)"/>
+      <rect x="21" y="3" width="2.5" height="5" rx="0.5" fill="var(--text-secondary)"/>
+    </svg>
+  </div>
+
+  <div class="content-area">
+
+    <div class="search-bar">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="搜索英雄名称...">
+    </div>
+
+    <div class="chip-group">
+      <span class="chip active">全部</span>
+      <span class="chip">法师</span>
+      <span class="chip">射手</span>
+      <span class="chip">坦克</span>
+      <span class="chip">战士</span>
+      <span class="chip">刺客</span>
+      <span class="chip">辅助</span>
+    </div>
+
+    <div class="sticky-header">S+ 级 · GOD TIER</div>
+
+    <div class="hero-card">
+      <div class="hero-avatar fire">B</div>
+      <div class="hero-info">
+        <div class="hero-name">布兰德</div>
+        <div class="hero-title">复仇焰魂</div>
+      </div>
+      <span class="badge s-plus">S+</span>
+      <div class="hero-stats">
+        <div class="hero-winrate good">53.2%</div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-avatar nature">Z</div>
+      <div class="hero-info">
+        <div class="hero-name">婕拉</div>
+        <div class="hero-title">荆棘之兴</div>
+      </div>
+      <span class="badge s-plus">S+</span>
+      <div class="hero-stats">
+        <div class="hero-winrate good">52.8%</div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-avatar ice">V</div>
+      <div class="hero-info">
+        <div class="hero-name">维克兹</div>
+        <div class="hero-title">虚空之眼</div>
+      </div>
+      <span class="badge s-plus">S+</span>
+      <div class="hero-stats">
+        <div class="hero-winrate good">52.1%</div>
+      </div>
+    </div>
+
+    <div class="sticky-header">S 级 · 顶级</div>
+
+    <div class="hero-card">
+      <div class="hero-avatar light">L</div>
+      <div class="hero-info">
+        <div class="hero-name">拉克丝</div>
+        <div class="hero-title">光辉女郎</div>
+      </div>
+      <span class="badge s">S</span>
+      <div class="hero-stats">
+        <div class="hero-winrate good">52.1%</div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-avatar light">S</div>
+      <div class="hero-info">
+        <div class="hero-name">萨勒芬妮</div>
+        <div class="hero-title">星籁歌姬</div>
+      </div>
+      <span class="badge s">S</span>
+      <div class="hero-stats">
+        <div class="hero-winrate good">51.8%</div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-avatar light">K</div>
+      <div class="hero-info">
+        <div class="hero-name">卡尔玛</div>
+        <div class="hero-title">天启者</div>
+      </div>
+      <span class="badge s">S</span>
+      <div class="hero-stats">
+        <div class="hero-winrate good">51.5%</div>
+      </div>
+    </div>
+
+    <div class="sticky-header">A 级 · 优秀</div>
+
+    <div class="hero-card">
+      <div class="hero-avatar dark">V</div>
+      <div class="hero-info">
+        <div class="hero-name">薇古丝</div>
+        <div class="hero-title">愁云使者</div>
+      </div>
+      <span class="badge a">A</span>
+      <div class="hero-stats">
+        <div class="hero-winrate good">51.5%</div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-avatar dark">M</div>
+      <div class="hero-info">
+        <div class="hero-name">莫甘娜</div>
+        <div class="hero-title">堕落天使</div>
+      </div>
+      <span class="badge a">A</span>
+      <div class="hero-stats">
+        <div class="hero-winrate good">50.8%</div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-avatar fire">J</div>
+      <div class="hero-info">
+        <div class="hero-name">吉格斯</div>
+        <div class="hero-title">爆破鬼才</div>
+      </div>
+      <span class="badge a">A</span>
+      <div class="hero-stats">
+        <div class="hero-winrate good">50.3%</div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-avatar light">H</div>
+      <div class="hero-info">
+        <div class="hero-name">黑默丁格</div>
+        <div class="hero-title">大发明家</div>
+      </div>
+      <span class="badge a">A</span>
+      <div class="hero-stats">
+        <div class="hero-winrate good">49.8%</div>
+      </div>
+    </div>
+
+    <div class="sticky-header">B 级 · 普通</div>
+
+    <div class="hero-card">
+      <div class="hero-avatar fire">A</div>
+      <div class="hero-info">
+        <div class="hero-name">安妮</div>
+        <div class="hero-title">黑暗之女</div>
+      </div>
+      <span class="badge b">B</span>
+      <div class="hero-stats">
+        <div class="hero-winrate okay">48.2%</div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-avatar dark">W</div>
+      <div class="hero-info">
+        <div class="hero-name">维迦</div>
+        <div class="hero-title">邪恶小法师</div>
+      </div>
+      <span class="badge b">B</span>
+      <div class="hero-stats">
+        <div class="hero-winrate bad">47.5%</div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-avatar light">Ah</div>
+      <div class="hero-info">
+        <div class="hero-name">阿狸</div>
+        <div class="hero-title">九尾妖狐</div>
+      </div>
+      <span class="badge b">B</span>
+      <div class="hero-stats">
+        <div class="hero-winrate bad">46.8%</div>
+      </div>
+    </div>
+
+    <div class="sticky-header">C 级 · 弱势</div>
+
+    <div class="hero-card">
+      <div class="hero-avatar dark">Lb</div>
+      <div class="hero-info">
+        <div class="hero-name">乐芙兰</div>
+        <div class="hero-title">诡术妖姬</div>
+      </div>
+      <span class="badge c">C</span>
+      <div class="hero-stats">
+        <div class="hero-winrate bad">44.1%</div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-avatar ice">R</div>
+      <div class="hero-info">
+        <div class="hero-name">瑞兹</div>
+        <div class="hero-title">符文法师</div>
+      </div>
+      <span class="badge c">C</span>
+      <div class="hero-stats">
+        <div class="hero-winrate bad">43.5%</div>
+      </div>
+    </div>
+
+    <div style="height:12px;"></div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>首页</span>
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>英雄</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>强化</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>社区</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>我的</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function setTheme(theme, btn) {
+  document.body.setAttribute('data-theme', theme);
+  document.querySelectorAll('.theme-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>
