@@ -2,6 +2,7 @@
 !.trae/specs/
 .trae/specs/*
 !.trae/specs/aram-mayhem-assistant-app/
+!.trae/rules/
 __pycache__/
 *.pyc
 .DS_Store
