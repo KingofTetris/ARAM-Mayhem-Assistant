@@ -1,10 +1,10 @@
 # ARAM Mayhem Assistant 项目开发规则
 
-> 版本：1.1.1
-> 生效日期：2026-05-03
+> 版本：1.3.0
+> 生效日期：2026-05-12
 > 适用范围：ARAM Mayhem Assistant 全栈项目（Android 客户端 + Spring Boot 后端）
 > 维护者：项目开发团队
-> 变更记录：v1.1.1 基于三位专家复核评估修复阻塞发布项
+> 变更记录：v1.3.0 新增 TDD 测试驱动开发规范（第七章 QA-007~QA-011），PH-003 测试覆盖检查项扩展，QA-006 交付清单扩展，修复 M4 模块循环依赖问题
 
 ---
 
@@ -410,7 +410,64 @@ test {
 
 **规则 CO-004**：GitHub 仓库描述必须清晰传达项目核心价值和用途，禁止留空或使用乱码。
 
-### 6.2 开发日志规范 [P1 🟠]
+### 6.2 文档管理 Agent 机制 [P0 🔴]
+
+**规则 CO-010**：项目核心文档的创建和修改必须通过"文档管理 Agent"审批流程，禁止直接写入。审批范围：
+
+| 文档 | 路径 | 审批要求 |
+|------|------|----------|
+| dev-log.md | `.trae/specs/aram-mayhem-assistant-app/dev-log.md` | 阶段完成后提交 Agent 审阅 |
+| tasks.md | `.trae/specs/aram-mayhem-assistant-app/tasks.md` | 阶段任务变更前提交 Agent 审阅 |
+| spec.md | `.trae/specs/aram-mayhem-assistant-app/spec.md` | 需求变更前提交 Agent 审阅 |
+| project_rules.md | `.trae/rules/project_rules.md` | 新增/修改规则后提交 Agent 审阅 |
+| review_report.md | `.trae/rules/review_report.md` | 审核报告完成后提交 Agent 审阅 |
+| evaluation_report.md | `.trae/rules/evaluation_report_*.md` | 评估报告完成后提交 Agent 审阅 |
+
+**规则 CO-011**：文档管理 Agent 审批清单：
+
+1. **结构完整性**：文档是否有清晰的章节结构？是否符合阶段划分？
+2. **内容准确性**：记录的内容是否与实际代码一致？是否存在时间线混乱？
+3. **决策追溯性**：每个决策是否有编号、摘要和理由？是否在决策索引中可查？
+4. **问题可追溯性**：每个问题是否有编号、现象、根因、解决方案、严重度？
+5. **经验教训可复用性**：是否提炼出可被后续阶段引用的经验教训？
+6. **版本一致性**：文档版本号是否与变更记录一致？
+
+**规则 CO-012**：审批流程：
+
+```
+1. 开发完成阶段任务 → 2. 起草文档内容 → 3. 提交文档管理 Agent 审阅
+                                                          ↓
+                              ← 不通过（列出修改意见） → 4. Agent 审核
+                                                          ↓
+                              ← 通过（写入文件） ← 5. 修改并重新提交
+```
+
+未经文档管理 Agent 审批通过的内容，禁止写入任何核心文档文件。
+
+### 6.3 开发角色定义 [P0 🔴]
+
+**规则 CO-013**：项目开发必须涉及以下角色，每个阶段开发前需确认角色完整：
+
+| 角色 | 职责 | 对应 Agent | 触发时机 |
+|------|------|-----------|----------|
+| Android 开发专家 | Android 客户端开发、组件设计、性能优化 | `android-backend-collaboration-expert` | 涉及 Android 功能开发时 |
+| 后端开发专家 | Spring Boot 后端开发、API 设计、数据库建模 | `backend-android-collaboration-expert` | 涉及后端功能开发时 |
+| QA 测试专家 | 单元测试编写、功能测试、安全测试、性能测试 | `android-backend-tester` | 编写代码前（TDD）或代码完成后 |
+| 安全审计员 | JWT 安全、密码加密、权限控制、输入验证 | `compliance-checker` | 涉及安全相关代码时 |
+| UI/UX 设计师 | 图标设计、界面布局、用户体验 | `ui-designer` | 涉及 UI 组件开发时 |
+| 文档管理 Agent | 文档审核、结构校验、版本一致性检查 | `Task` + `Read` + `Grep` | 文档写入前 |
+| 代码审查员 | 代码质量、规范检查、依赖方向验证 | `backend-android-tester` | 代码提交前 |
+
+**规则 CO-014**：开发流程中必须按以下顺序调用角色：
+
+```
+1. 需求分析 → 2. 方案设计 → 3. TDD 测试编写（QA）→ 4. 功能开发（Android/后端）
+→ 5. 安全审计（安全员）→ 6. 代码审查（审查员）→ 7. 文档更新（文档 Agent）
+```
+
+**规则 CO-015**：任何阶段发现角色缺失（如 M1~M4 缺失 QA 测试专家），必须在进入下一阶段前补充该角色参与的历史代码审查和测试补写。
+
+### 6.4 开发日志规范 [P1 🟠]
 
 **规则 CO-005**：每个开发阶段完成后必须更新 `dev-log.md`，记录内容包含：
 - 实施内容（具体操作步骤）
@@ -422,7 +479,7 @@ test {
 
 **规则 CO-007**：关键决策必须编号（决策1、决策2...），并在决策索引表中维护完整列表。
 
-### 6.3 版本控制规范 [P1 🟠]
+### 6.5 版本控制规范 [P1 🟠]
 
 **规则 CO-008**：Git 提交信息格式：
 
@@ -448,9 +505,128 @@ test {
 
 ---
 
-## 第七章 问题处理机制
+## 第七章 测试驱动开发规范
 
-### 7.1 问题分类与响应 [P1 🟠]
+### 7.1 TDD 核心原则 [P0 🔴]
+
+**规则 QA-007**：新功能开发必须遵循 TDD（测试驱动开发）流程：
+1. **Red（红）**：先编写失败的测试用例，明确预期行为
+2. **Green（绿）**：编写最小化实现代码使测试通过
+3. **Refactor（重构）**：在保证测试通过的前提下优化代码结构
+禁止先写功能后补测试。所有新代码必须先写测试再实现功能。
+
+**规则 QA-008**：每个模块必须达到以下最低测试覆盖率：
+
+| 模块类型 | 最低覆盖率 | 说明 |
+|----------|-----------|------|
+| 业务逻辑（Service/ViewModel） | 80% | 核心业务规则 + 边界条件 |
+| 数据访问（Mapper/DAO） | 60% | SQL 正确性 + 映射正确性 |
+| Controller/Fragment | 70% | 请求参数校验 + 状态管理 |
+| 工具类（Utils） | 90% | 输入输出转换 + 边界条件 |
+
+理由：低覆盖率会导致回归缺陷，M3 阶段教训表明缺乏测试是代码质量问题的主因。
+
+**规则 QA-009**：新功能提交的 PR 必须满足以下条件才能合并：
+1. 新增测试用例数量 ≥ 新增公共方法数量
+2. 新增代码覆盖率 ≥ 模块最低覆盖率要求
+3. 所有测试用例 100% 通过
+4. CI 流水线包含自动测试执行
+
+### 7.2 Android 单元测试规范 [P0 🔴]
+
+**规则 QA-010**：每个 Android 模块必须包含 `test/` 目录，编写 JUnit 5 单元测试：
+
+```
+feature-hero/
+├── src/
+│   ├── main/java/          # 源代码
+│   └── test/java/          # 单元测试
+│       └── com/.../
+│           └── HeroListViewModelTest.java
+```
+
+**规则 QA-011**：Android ViewModel 必须测试以下内容：
+- LiveData 状态转换正确性
+- 网络请求成功/失败/空列表三种场景
+- 分页加载逻辑（loadMore/isLastPage）
+- 搜索/筛选逻辑
+- 错误处理
+
+```java
+// 示例：HeroListViewModel 测试
+@ExtendWith(MockitoExtension.class)
+public class HeroListViewModelTest {
+
+    @Mock
+    private HeroRepository mockRepository;
+
+    @InjectMocks
+    private HeroListViewModel viewModel;
+
+    @Test
+    public void testLoadHeroes_success() {
+        // 模拟网络返回 20 个英雄
+        when(mockRepository.getHeroes(any())).thenReturn(mockResponse);
+        
+        // 执行加载
+        viewModel.loadHeroes(true);
+        
+        // 验证 LiveData 状态
+        assertEquals(20, viewModel.getHeroes().getValue().size());
+        assertFalse(viewModel.getLoading().getValue());
+    }
+}
+```
+
+### 7.3 后端单元测试规范 [P0 🔴]
+
+**规则 QA-012**：Spring Boot Service 必须使用 `@ExtendWith(MockitoExtension.class)` 编写单元测试：
+
+```java
+// 示例：HeroService 测试
+@ExtendWith(MockitoExtension.class)
+public class HeroServiceTest {
+
+    @Mock
+    private HeroMapper mockMapper;
+
+    @Mock
+    private StringRedisTemplate mockRedis;
+
+    @InjectMocks
+    private HeroServiceImpl heroService;
+
+    @Test
+    public void testGetHeroList_success() {
+        // Given：模拟数据库返回 25 条
+        when(mockMapper.selectPage(any())).thenReturn(mockPage);
+        
+        // When
+        PageResult<HeroListVO> result = heroService.getHeroList(1, 20, "", "", "winRate");
+        
+        // Then
+        assertEquals(20, result.getRecords().size());
+        assertTrue(result.getHasMore());
+    }
+}
+```
+
+**规则 QA-013**：后端 Controller 测试必须覆盖：
+- 请求参数校验（缺少必传参数、参数格式错误）
+- 正常请求（200 响应）
+- 异常场景（400/401/404/500）
+
+**规则 QA-014**：安全相关代码必须有专门测试：
+- JWT Token 生成和验证
+- BCrypt 密码加密
+- Refresh Token type 校验
+- 权限拦截
+
+---
+
+## 第八章 问题处理机制
+
+### 8.1 问题分类与响应 [P1 🟠]
 
 **规则 PH-001**：问题按严重程度分类处理：
 
@@ -460,7 +636,7 @@ test {
 | 🟠 严重 | 功能异常或性能显著下降 | 当日修复 | 记录至 dev-log，优先级高于新功能 |
 | 🟡 中等 | 体验不佳或代码质量问题 | 本迭代修复 | 记录至 dev-log，排入迭代计划 |
 
-### 7.2 问题记录模板 [P1 🟠]
+### 8.2 问题记录模板 [P1 🟠]
 
 **规则 PH-002**：所有问题必须按以下模板记录至 dev-log.md：
 
@@ -489,6 +665,11 @@ test {
 
 | 检查项 | 规则编号 | 检查时机 |
 |--------|----------|----------|
+| 新增 Service/ViewModel 是否有对应单元测试 | QA-007 | 编写功能代码前 |
+| 后端测试覆盖率是否 ≥ 80%（Service）/ 70%（Controller） | QA-008 | 提交代码前 |
+| Android 测试覆盖率是否 ≥ 80%（ViewModel）/ 70%（Fragment） | QA-008 | 提交代码前 |
+| 新增 Controller 是否有参数校验测试 | QA-013 | 编写 API 后 |
+| JWT/安全相关代码是否有专门测试 | QA-014 | 编写安全代码后 |
 | Vector Drawable 颜色格式是否为 8 位 hex | AD-001 | 创建/修改图标后 |
 | Adaptive Icon 是否引用 @drawable/ | AD-003 | 创建启动图标后 |
 | 新模块是否有 AndroidManifest.xml | AR-007 | 创建新模块后 |
@@ -498,6 +679,14 @@ test {
 | Token 是否使用 EncryptedSharedPreferences | AD-012 | 涉及凭证存储时 |
 | 导航图是否在 app 模块 | AR-006 | 修改导航配置时 |
 | Refresh Token 刷新是否校验 type claim | BE-014 | 实现 Token 刷新逻辑时 |
+| 模块开发完成后是否更新 dev-log.md | SYNC-001 | 每次模块/功能开发完成后 |
+| 决策索引是否同步更新 | SYNC-002 | 每次记录新决策后 |
+| 新规范是否记录至 project_rules.md | SYNC-003 | 产生新规范/约定时 |
+| 规则文档版本号是否更新 | SYNC-004 | 每次修改规则后 |
+| 多仓库是否分别独立提交 | SYNC-006 | 每次提交代码时 |
+| 后端 API 是否有 Swagger 注解 | SYNC-007 | 新增/修改 API 后 |
+| DDL 变更是否同步记录 | SYNC-008 | 变更数据库表结构后 |
+| UI 组件是否检查资源分离 | SYNC-009 | 新增/修改 UI 后 |
 
 ---
 
@@ -623,23 +812,189 @@ public class TokenStore {
 
 **规则 QA-002**：修改图标资源后必须执行全量编译验证（`gradlew assembleDebug`），而非仅检查单个文件。
 
-### 11.2 测试验证 [P1 🟠]
+### 11.2 单元测试强制要求 [P0 🔴]
 
-**规则 QA-003**：单元测试必须覆盖核心业务逻辑和边界条件。
+**规则 QA-003**：新功能开发必须遵循 TDD 流程：先写测试，再写实现。每个模块必须达到以下覆盖率标准：
 
-**规则 QA-004**：测试用例必须 100% 通过，不允许跳过失败的测试。
+| 模块类型 | 最低覆盖率 | 说明 |
+|----------|-----------|------|
+| 业务逻辑（Service/ViewModel） | 80% | 核心业务规则 + 边界条件 |
+| 数据访问（Mapper/DAO） | 60% | SQL 正确性 + 映射正确性 |
+| Controller/Fragment | 70% | 请求参数校验 + 状态管理 |
+| 工具类（Utils） | 90% | 输入输出转换 + 边界条件 |
 
-**规则 QA-005**：修改核心模块后必须重新运行相关测试，确保无回归。
+**规则 QA-004**：以下代码必须有对应的单元测试：
+1. 后端 Service 层所有公共方法
+2. Android ViewModel 层所有公共方法
+3. JWT Token 生成和验证逻辑
+4. Refresh Token type 校验逻辑
+5. 所有 API 参数校验逻辑
 
-### 11.3 交付物验证 [P1 🟠]
+**规则 QA-005**：修改核心模块后必须重新运行相关测试，确保无回归。测试用例必须 100% 通过，不允许跳过失败的测试。
 
 **规则 QA-006**：阶段交付前必须检查以下清单：
 
 - [ ] 编译通过（无 error、无 warning）
-- [ ] 单元测试全部通过
+- [ ] 后端服务测试覆盖率 ≥ 80%（Service）
+- [ ] Android ViewModel 测试覆盖率 ≥ 80%
+- [ ] JWT/安全相关代码有专门测试（覆盖率达标）
 - [ ] dev-log.md 已更新（实施内容 + 决策 + 问题）
+- [ ] 决策索引同步更新
+- [ ] PH-003 预防清单同步更新（如有新规则）
+- [ ] project_rules.md 同步更新（如有新规范）
+- [ ] 规则文档版本号已更新
 - [ ] 新增文件数量与预期一致
 - [ ] 无遗留 TODO 或临时调试代码
+- [ ] 规则文档与实际代码一致性校验
+- [ ] 所有仓库已分别提交并推送
+
+---
+
+## 第十二章 模块开发伴随性任务
+
+> 本章规则定义了每次开发新模块时，**必须同步完成的非代码任务**。
+> 这些任务不产生业务代码，但对项目健康度至关重要。
+> 遗忘执行这些任务是 M1~M3 阶段的主要教训之一。
+
+### 12.1 开发日志同步 [P0 🔴]
+
+**规则 SYNC-001**：每个模块/功能开发完成后（编译通过即可），必须立即更新 `dev-log.md`，记录：
+1. 实施内容（具体做了什么，列出新增/修改/删除的文件清单）
+2. 关键决策（如有，格式：`**决策N**：[摘要]，理由：[理由]`）
+3. 遇到的问题（如有，按 PH-002 模板记录四要素）
+4. 编译验证结果（Android 的 task 数/APK 大小，后端的编译时间）
+
+**规则 SYNC-002**：决策索引必须同步更新。每次在 dev-log.md 中记录新决策后，必须同时在"关键决策索引"表格中新增一行。
+
+### 12.2 规则文档同步 [P1 🟠]
+
+**规则 SYNC-003**：开发过程中如产生新的规范、约定或最佳实践，必须立即记录至 `project_rules.md`：
+- 新的架构模式 → 第二章或对应技术章节
+- 新的组件开发规范 → 第三章
+- 新的后端规范 → 第四章
+- 新的构建配置 → 第五章
+- 新的协作流程 → 第六章
+- 新的问题预防 → 第七章 PH-003 预防清单
+
+**规则 SYNC-004**：规则文档版本号和版本控制信息必须同步更新。每次修改规则后：
+1. 更新文档头部版本号（如 `v1.1.1` → `v1.1.2`）
+2. 更新头部变更记录
+3. 在底部版本控制信息表格新增一行
+
+### 12.3 Git 提交规范 [P0 🔴]
+
+**规则 SYNC-005**：每个模块开发完成后，必须在所有涉及的仓库分别提交，commit message 格式：
+
+```
+[M{里程碑编号}] {类型}: {简要描述}
+
+1. 变更详情：
+   - 模块1: 新增/修改内容
+   - 模块2: 新增/修改内容
+2. 构建配置: 变更内容
+3. 资源文件: 变更内容
+```
+
+类型：feat / fix / refactor / docs / test / chore
+
+**规则 SYNC-006**：多仓库修改时，每个仓库独立提交，禁止跨仓库混合同一 commit。提交顺序：任务仓库 → Android仓库 → 后端仓库。
+
+### 12.4 后端 API 文档同步 [P1 🟠]
+
+**规则 SYNC-007**：后端新增/修改 API 后，必须确保 SpringDoc Swagger 注解完整：
+- `@Operation(summary = "...", description = "...")` 标注 Controller 方法
+- `@Schema(description = "...")` 标注 DTO 字段
+- 启动后端后访问 `http://localhost:8080/swagger-ui.html` 验证文档可访问
+
+### 12.5 数据库变更同步 [P0 🔴]
+
+**规则 SYNC-008**：后端数据库表结构变更后（DDL），必须同步：
+1. 更新 `schema.sql`（如存在）
+2. 如使用 Flyway/Liquibase 则新增 migration 脚本
+3. MVP 阶段（无 migration 工具）时，直接在 `dev-log.md` 记录 DDL 变更
+4. 确保 MySQL 本地库执行最新 DDL
+
+### 12.6 前端 UI 资源同步 [P1 🟠]
+
+**规则 SYNC-009**：新增/修改 Android UI 组件或布局后，必须检查：
+1. 新增 string 是否已添加至 `strings.xml`（禁止硬编码文本）
+2. 新增 color 是否已添加至 `colors.xml`（禁止硬编码色值）
+3. 新增 dimen 是否已添加至 `dimens.xml`
+4. 新增 drawable 是否已添加至 `core-ui/src/main/res/drawable/`
+
+---
+
+## 第十二章 模块开发伴随性任务
+
+> 本章规则定义了每次开发新模块时，**必须同步完成的非代码任务**。
+> 这些任务不产生业务代码，但对项目健康度至关重要。
+> 遗忘执行这些任务是 M1~M3 阶段的主要教训之一。
+
+### 12.1 开发日志同步 [P0 🔴]
+
+**规则 SYNC-001**：每个模块/功能开发完成后（编译通过即可），必须立即更新 `dev-log.md`，记录：
+1. 实施内容（具体做了什么，列出新增/修改/删除的文件清单）
+2. 关键决策（如有，格式：`**决策N**：[摘要]，理由：[理由]`）
+3. 遇到的问题（如有，按 PH-002 模板记录四要素）
+4. 编译验证结果（Android 的 task 数/APK 大小，后端的编译时间）
+
+**规则 SYNC-002**：决策索引必须同步更新。每次在 dev-log.md 中记录新决策后，必须同时在"关键决策索引"表格中新增一行。
+
+### 12.2 规则文档同步 [P1 🟠]
+
+**规则 SYNC-003**：开发过程中如产生新的规范、约定或最佳实践，必须立即记录至 `project_rules.md`：
+- 新的架构模式 → 第二章或对应技术章节
+- 新的组件开发规范 → 第三章
+- 新的后端规范 → 第四章
+- 新的构建配置 → 第五章
+- 新的协作流程 → 第六章
+- 新的问题预防 → 第七章 PH-003 预防清单
+
+**规则 SYNC-004**：规则文档版本号和版本控制信息必须同步更新。每次修改规则后：
+1. 更新文档头部版本号（如 `v1.1.1` → `v1.1.2`）
+2. 更新头部变更记录
+3. 在底部版本控制信息表格新增一行
+
+### 12.3 Git 提交规范 [P0 🔴]
+
+**规则 SYNC-005**：每个模块开发完成后，必须在所有涉及的仓库分别提交，commit message 格式：
+
+```
+[M{里程碑编号}] {类型}: {简要描述}
+
+1. 变更详情：
+   - 模块1: 新增/修改内容
+   - 模块2: 新增/修改内容
+2. 构建配置: 变更内容
+3. 资源文件: 变更内容
+```
+
+类型：feat / fix / refactor / docs / test / chore
+
+**规则 SYNC-006**：多仓库修改时，每个仓库独立提交，禁止跨仓库混合同一 commit。提交顺序：任务仓库 → Android仓库 → 后端仓库。
+
+### 12.4 后端 API 文档同步 [P1 🟠]
+
+**规则 SYNC-007**：后端新增/修改 API 后，必须确保 SpringDoc Swagger 注解完整：
+- `@Operation(summary = "...", description = "...")` 标注 Controller 方法
+- `@Schema(description = "...")` 标注 DTO 字段
+- 启动后端后访问 `http://localhost:8080/swagger-ui.html` 验证文档可访问
+
+### 12.5 数据库变更同步 [P0 🔴]
+
+**规则 SYNC-008**：后端数据库表结构变更后（DDL），必须同步：
+1. 更新 `schema.sql`（如存在）
+2. 如使用 Flyway/Liquibase 则新增 migration 脚本
+3. MVP 阶段（无 migration 工具）时，直接在 `dev-log.md` 记录 DDL 变更
+4. 确保 MySQL 本地库执行最新 DDL
+
+### 12.6 前端 UI 资源同步 [P1 🟠]
+
+**规则 SYNC-009**：新增/修改 Android UI 组件或布局后，必须检查：
+1. 新增 string 是否已添加至 `strings.xml`（禁止硬编码文本）
+2. 新增 color 是否已添加至 `colors.xml`（禁止硬编码色值）
+3. 新增 dimen 是否已添加至 `dimens.xml`
+4. 新增 drawable 是否已添加至 `core-ui/src/main/res/drawable/`
 
 ---
 
@@ -693,6 +1048,7 @@ public class TokenStore {
 | CO-001 | 问题十一 | README 文档不完整 |
 | TU-001 | 问题十二 | 批量替换遗漏 |
 | BE-014 | — | JWT Token Type 校验缺失 |
+| SYNC-001~009 | — | M1~M3 阶段伴随性任务遗漏教训 |
 
 ---
 
@@ -703,6 +1059,8 @@ public class TokenStore {
 | 1.0.0 | 2026-05-03 | 初始版本，基于 M1~M3 阶段开发实践总结 | 项目开发团队 |
 | 1.1.0 | 2026-05-03 | 基于三位专家审核修复第一优先级问题：新增 BE-014 JWT Token Type 校验规范；修复 AD-008 DiffUtil Long 比较示例；AR-006 补充 navigation 遗留目录说明；移除不存在的 kotlinVersion；更新 gsonVersion 为 2.11.0；修复 BE-013 CORS 示例代码 | 项目开发团队 |
 | 1.1.1 | 2026-05-03 | 基于三位专家复核评估修复阻塞发布项：BE-014 从4.4缓存规范移至4.3安全规范[P0]；BE-014 补充 getTokenType 方法实现和 AccessToken type claim 要求；BE-014 补充校验时序和 null 处理说明；决策索引新增决策38；PH-003 预防清单新增 BE-014 检查项 | 项目开发团队 |
+| 1.2.0 | 2026-05-03 | 新增第十二章模块开发伴随性任务（SYNC-001~SYNC-009），QA-006 交付清单扩展，PH-003 预防清单扩展 | 项目开发团队 |
+| 1.3.0 | 2026-05-12 | 新增 TDD 测试驱动开发规范（QA-007~QA-014）；修复 M4 模块循环依赖问题（DTO 移至 core-network）；JWT Token Type 安全漏洞代码修复；HeroListFragment 完整实现；PH-003 测试覆盖检查项扩展 | 项目开发团队 |
 
 ---
 
