@@ -621,8 +621,9 @@ Android：gradlew :feature-hero:assembleDebug → BUILD SUCCESSFUL (15s)
 ## 5.4 阶段成果与经验教训
 
 **交付物**：
-- 后端：AugmentController + AugmentServiceImpl + AugmentDataInitializer（130 个符文）
+- 后端：AugmentController + AugmentServiceImpl + AugmentDataInitializer（130 个符文）+ synergy-progress/recommend API
 - Android：AugmentRepository + AugmentViewModel + AugmentListFragment + AugmentDetailBottomSheet
+- Android：SynergyProgressSection + AugmentRecommendFragment（Task 11）
 - 离线缓存：Room → Network → Update Room（SYNC-010）
 - 离线检测：ConnectivityManager.NetworkCallback（SYNC-011）
 
@@ -643,6 +644,7 @@ Android：gradlew :feature-augment:assembleDebug → BUILD SUCCESSFUL (16s)
 |------|----------|------|------|
 | 51 | AugmentApi 返回类型使用 PageResponse | M5 | 网络 |
 | 52 | 强化符文使用 TabLayout 按品质筛选 | M5 | UI |
+| 53 | 套装进度使用 ProgressBar 展示 | M5 | UI |
 
 ---
 

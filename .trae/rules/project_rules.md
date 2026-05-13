@@ -1,10 +1,10 @@
 # ARAM Mayhem Assistant 项目开发规则
 
-> 版本：1.5.1
+> 版本：1.5.2
 > 生效日期：2026-05-14
 > 适用范围：ARAM Mayhem Assistant 全栈项目（Android 客户端 + Spring Boot 后端）
 > 维护者：项目开发团队
-> 变更记录：v1.5.1 M5 Task 11 完成：套装进度 API（synergy-progress）+ 智能推荐 API（recommend）；Android SynergyProgressSection + AugmentRecommendFragment
+> 变更记录：v1.5.2 新增 git-commit-guide.md Git提交问题清单与规范；更新 CO-008 规则要求详细说明必须包含修改内容、涉及模块、解决问题、相关任务
 
 ---
 
@@ -481,21 +481,35 @@ test {
 
 ### 6.5 版本控制规范 [P1 🟠]
 
-**规则 CO-008**：Git 提交信息格式：
+**规则 CO-008**：Git 提交信息格式必须遵循以下规范（详细内容见 `git-commit-guide.md`）：
 
 ```
 [模块] 类型: 简要描述
 
-详细说明（可选）
+详细说明：
+- 变更内容1
+- 变更内容2
+- 涉及的文件/模块
+- 解决的问题或实现的功能
+相关任务: Task XX
 ```
 
-类型：feat（新功能）/ fix（修复）/ refactor（重构）/ docs（文档）/ test（测试）/ chore（构建/配置）
+**模块标识**：`[M1]`~`[M6]` / `[core-*]` / `[feature-*]` / `[backend]` / `[docs]`
+
+**类型**：`feat`（新功能）/ `fix`（Bug修复）/ `refactor`（重构）/ `perf`（性能）/ `test`（测试）/ `docs`（文档）/ `chore`（构建配置）/ `style`（格式）/ `ci`（CI/CD）
+
+**详细说明必须包含**：涉及的具体文件/模块、具体的修改内容、解决的问题或实现的功能、相关的需求/任务编号。
 
 示例：
 ```
-[core-ui] feat: 新增 TierBadgeView 自定义 View
-[core-network] fix: 修复 TokenRefreshInterceptor 并发刷新死锁
-[app] refactor: 将共享资源迁移至 core-ui 模块
+[feature-augment] feat: 实现强化符文推荐功能
+
+详细说明：
+- 新增 SynergyProgressResponse/AugmentRecommendRequest/AugmentRecommendResponse DTO
+- 新增 AugmentApi.getSynergyProgress() 和 getRecommendations() API 端点
+- 新增 AugmentRecommendFragment 布局和 Fragment 类
+- 解决 Task 11 套装追踪与智能推荐功能缺失问题
+相关任务: Task 11
 ```
 
 **规则 CO-009**：禁止提交敏感信息（密钥、密码、Token）到 Git 仓库。`.gitignore` 必须覆盖：
@@ -1078,6 +1092,7 @@ public class TokenStore {
 | 1.4.0 | 2026-05-13 | 新增 SYNC-010/011 离线缓存规范；PH-003 新增离线检测检查项；M4 英雄详情数据扩展（skills/counterTips/synergies/avgKDA/recommendedBuild）；M4 离线缓存逻辑实现（Room → Network → Update Room）；M4 离线模式检测（ConnectivityManager） | 项目开发团队 |
 | 1.5.0 | 2026-05-14 | M5 强化符文模块完成：后端 AugmentController + AugmentServiceImpl + AugmentDataInitializer（130个符文）；Android AugmentRepository + AugmentViewModel + AugmentListFragment（TabLayout+分页+离线检测）+ AugmentDetailBottomSheet | 项目开发团队 |
 | 1.5.1 | 2026-05-14 | M5 Task 11 完成：套装进度 API（synergy-progress）+ 智能推荐 API（recommend）；Android SynergyProgressSection + AugmentRecommendFragment | 项目开发团队 |
+| 1.5.2 | 2026-05-14 | 新增 git-commit-guide.md Git提交问题清单与规范；更新 CO-008 规则要求详细说明必须包含修改内容、涉及模块、解决问题、相关任务 | 项目开发团队 |
 
 ---
 
