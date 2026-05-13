@@ -1,10 +1,10 @@
 # ARAM Mayhem Assistant 项目开发规则
 
-> 版本：1.3.0
+> 版本：1.4.0
 > 生效日期：2026-05-12
 > 适用范围：ARAM Mayhem Assistant 全栈项目（Android 客户端 + Spring Boot 后端）
 > 维护者：项目开发团队
-> 变更记录：v1.3.0 新增 TDD 测试驱动开发规范（第七章 QA-007~QA-011），PH-003 测试覆盖检查项扩展，QA-006 交付清单扩展，修复 M4 模块循环依赖问题
+> 变更记录：v1.4.0 新增 SYNC-010/011 离线缓存规范，PH-003 新增离线检测检查项；M4 英雄详情数据扩展（skills/counterTips/synergies）；M4 离线缓存逻辑实现（Room → Network → Update Room）
 
 ---
 
@@ -679,6 +679,8 @@ public class HeroServiceTest {
 | Token 是否使用 EncryptedSharedPreferences | AD-012 | 涉及凭证存储时 |
 | 导航图是否在 app 模块 | AR-006 | 修改导航配置时 |
 | Refresh Token 刷新是否校验 type claim | BE-014 | 实现 Token 刷新逻辑时 |
+| 新增 Repository 是否有离线缓存逻辑 | SYNC-10 | 编写 Repository 时 |
+| 新增网络请求 Fragment 是否注册离线检测 | SYNC-11 | 编写网络相关 Fragment 时 |
 | 模块开发完成后是否更新 dev-log.md | SYNC-001 | 每次模块/功能开发完成后 |
 | 决策索引是否同步更新 | SYNC-002 | 每次记录新决策后 |
 | 新规范是否记录至 project_rules.md | SYNC-003 | 产生新规范/约定时 |
@@ -922,6 +924,18 @@ public class TokenStore {
 3. 新增 dimen 是否已添加至 `dimens.xml`
 4. 新增 drawable 是否已添加至 `core-ui/src/main/res/drawable/`
 
+### 12.7 离线缓存规范 [P1 🟠]
+
+**规则 SYNC-010**：新增 Repository 时必须实现离线缓存逻辑：
+1. 网络请求优先 → 成功返回数据 + 异步写入本地缓存
+2. 网络请求失败 → 从本地缓存读取数据返回
+3. 缓存写入应在后台线程执行，避免阻塞主线程
+
+**规则 SYNC-011**：新增涉及网络请求的 Fragment 时必须注册离线检测：
+1. 使用 ConnectivityManager.NetworkCallback 监听网络状态
+2. 网络断开时显示 Snackbar 提示用户当前为离线模式
+3. 网络恢复时可自动刷新或提示用户手动刷新
+
 ---
 
 ## 第十二章 模块开发伴随性任务
@@ -1061,6 +1075,7 @@ public class TokenStore {
 | 1.1.1 | 2026-05-03 | 基于三位专家复核评估修复阻塞发布项：BE-014 从4.4缓存规范移至4.3安全规范[P0]；BE-014 补充 getTokenType 方法实现和 AccessToken type claim 要求；BE-014 补充校验时序和 null 处理说明；决策索引新增决策38；PH-003 预防清单新增 BE-014 检查项 | 项目开发团队 |
 | 1.2.0 | 2026-05-03 | 新增第十二章模块开发伴随性任务（SYNC-001~SYNC-009），QA-006 交付清单扩展，PH-003 预防清单扩展 | 项目开发团队 |
 | 1.3.0 | 2026-05-12 | 新增 TDD 测试驱动开发规范（QA-007~QA-014）；修复 M4 模块循环依赖问题（DTO 移至 core-network）；JWT Token Type 安全漏洞代码修复；HeroListFragment 完整实现；PH-003 测试覆盖检查项扩展 | 项目开发团队 |
+| 1.4.0 | 2026-05-13 | 新增 SYNC-010/011 离线缓存规范；PH-003 新增离线检测检查项；M4 英雄详情数据扩展（skills/counterTips/synergies/avgKDA/recommendedBuild）；M4 离线缓存逻辑实现（Room → Network → Update Room）；M4 离线模式检测（ConnectivityManager） | 项目开发团队 |
 
 ---
 
