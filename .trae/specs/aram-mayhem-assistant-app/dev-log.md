@@ -1,9 +1,9 @@
 # ARAM Mayhem Assistant 开发日志
 
 > 本文档按开发阶段分节记录所有关键操作、技术决策、问题与解决方案。
-> 最后更新：2026-05-13
-> 当前进度：M4 阶段已完成 ✅
-> 文档版本：v2.2（2026-05-13 M4 遗漏任务全部完成）
+> 最后更新：2026-05-14
+> 当前进度：M5 阶段已完成 ✅
+> 文档版本：v2.3（2026-05-14 M5 强化符文模块完成）
 
 ---
 
@@ -15,7 +15,7 @@
 | M2 | 基础架构 | ✅ 完成 | 100% | MySQL 建模 + REST API + JWT 认证 |
 | M3 | Android UI 框架 | ✅ 完成 | 100% | 核心模块 + 8 组件 + 55 图标 + 规则文档 |
 | M4 | 英雄模块 | ✅ 完成 | 100% | 后端完成 + HeroListFragment + HeroDetailFragment + 离线缓存 + 测试 |
-| M5 | 强化符文模块 | ⏳ 待开始 | 0% | 依赖 M4 |
+| M5 | 强化符文模块 | ✅ 完成 | 100% | 依赖 M4 |
 | M6 | 社区模块 | ⏳ 待开始 | 0% | 依赖 M4+M5 |
 | M7 | 版本与公告 | ⏳ 待开始 | 0% | 依赖 M4 |
 | M8 | 个人中心 | ⏳ 待开始 | 0% | 依赖 M5+M6 |
@@ -561,6 +561,77 @@ Android：gradlew :feature-hero:assembleDebug → BUILD SUCCESSFUL (15s)
 
 ---
 
+# 第五阶段：强化符文模块（M5）
+
+## 5.1 任务目标与范围
+
+- 后端：强化符文 CRUD API + 种子数据 + Redis 缓存
+- Android：强化符文列表 Fragment（TabLayout + 分页 + 状态管理）
+- Android：强化符文详情 BottomSheet
+- Android：离线缓存 + 离线检测
+
+## 5.2 实施内容与关键决策
+
+### 5.2.1 后端开发
+
+**实施内容**：
+1. AugmentController：GET /api/augments + GET /api/augments/{id}
+2. AugmentServiceImpl：分页查询 + 质量筛选 + 套装筛选 + Redis 缓存
+3. AugmentVO + AugmentListVO（继承关系，详情扩展字段）
+4. AugmentDataInitializer：130 个强化符文种子数据（棱彩 48 个 + 传说 32 个 + 史诗 30 个 + 次级 20 个）
+
+### 5.2.2 Android 端开发
+
+**实施内容**：
+1. AugmentResponse + AugmentDetailResponse DTO（core-network）
+2. AugmentApi 更新使用正确类型（PageResponse<AugmentResponse>）
+3. AugmentEntity 扩展（新增 nameZh/nameEn/winRate/pickRate/avgPlacement/tier/synergySet2/synergySet3）
+4. AugmentDao 新增同步查询方法（getAllAugmentsSync/getAugmentByIdSync）
+5. AugmentRepository（SYNC-010 离线缓存逻辑）
+6. AugmentViewModel + AugmentDetailViewModel
+7. AugmentListFragment：TabLayout + RecyclerView + 分页 + 离线检测（SYNC-011）
+8. AugmentDetailBottomSheet：详情展示 + 套装芯片 + 数据统计
+
+**关键决策**：
+| 编号 | 决策 | 理由 |
+|------|------|------|
+| 51 | AugmentApi 返回类型使用 PageResponse | 后端分页响应结构与 Hero 模块一致 |
+| 52 | 强化符文使用 TabLayout 按品质筛选 | PRISMATIC/GOLD/SILVER 三档筛选 |
+
+## 5.3 技术问题与解决方案
+
+| 编号 | 问题 | 根因 | 解决方案 | 严重度 |
+|------|------|------|----------|--------|
+| M5-01 | feature-augment 缺少 Retrofit 依赖 | build.gradle 未配置网络库 | 添加 retrofit/okhttp/gson 依赖 | 🟠 |
+
+## 5.4 阶段成果与经验教训
+
+**交付物**：
+- 后端：AugmentController + AugmentServiceImpl + AugmentDataInitializer（130 个符文）
+- Android：AugmentRepository + AugmentViewModel + AugmentListFragment + AugmentDetailBottomSheet
+- 离线缓存：Room → Network → Update Room（SYNC-010）
+- 离线检测：ConnectivityManager.NetworkCallback（SYNC-011）
+
+**编译验证**：
+```
+后端：mvn test → Tests run: 47, Failures: 0, Errors: 0 — BUILD SUCCESS
+Android：gradlew :feature-augment:assembleDebug → BUILD SUCCESSFUL (16s)
+```
+
+**经验教训**：
+1. ⚠️ 新 feature 模块需要显式添加 Retrofit/OkHttp 依赖，不能依赖传递
+
+---
+
+# 全局决策索引
+
+| 编号 | 决策摘要 | 阶段 | 模块 |
+|------|----------|------|------|
+| 51 | AugmentApi 返回类型使用 PageResponse | M5 | 网络 |
+| 52 | 强化符文使用 TabLayout 按品质筛选 | M5 | UI |
+
+---
+
 # 问题分类索引
 
 ## A. 资源格式类
@@ -580,10 +651,11 @@ Android：gradlew :feature-hero:assembleDebug → BUILD SUCCESSFUL (15s)
 
 ## C. 构建工具类
 | 编号 | 问题 | 阶段 | 解决状态 |
-|------|------|------|----------|
+|------|------|----------|--------|
 | M1-01 | Gradle wrapper JAR 必须通过命令生成 | M1 | ✅ 已修复 |
 | M3-10 | java-library 使用 JUnit 5 需 useJUnitPlatform() | M3 | ✅ 已修复 |
 | M3-12 | SearchReplace 仅替换首个匹配项 | M3 | ✅ 已规避 |
+| M5-01 | feature-augment 缺少 Retrofit 依赖 | M5 | ✅ 已修复 |
 
 ## D. 设计与语义类
 | 编号 | 问题 | 阶段 | 解决状态 |
@@ -622,3 +694,4 @@ Android：gradlew :feature-hero:assembleDebug → BUILD SUCCESSFUL (15s)
 | 15 | **core 模块不能引用 feature 模块** | M4-01 |
 | 16 | **TDD 不是可选项，是必选项** | M4-04/M4-05 |
 | 17 | **功能开发前必须先写测试用例** | M4-04/M4-05 |
+| 18 | 新 feature 模块需显式添加 Retrofit/OkHttp 依赖 | M5-01 |
