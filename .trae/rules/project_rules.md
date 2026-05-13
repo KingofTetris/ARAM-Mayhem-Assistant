@@ -1,10 +1,10 @@
 # ARAM Mayhem Assistant 项目开发规则
 
-> 版本：1.5.0
+> 版本：1.5.1
 > 生效日期：2026-05-14
 > 适用范围：ARAM Mayhem Assistant 全栈项目（Android 客户端 + Spring Boot 后端）
 > 维护者：项目开发团队
-> 变更记录：v1.5.0 M5 强化符文模块完成：后端 AugmentController + AugmentServiceImpl + AugmentDataInitializer（130个符文）；Android AugmentRepository + AugmentViewModel + AugmentListFragment（TabLayout+分页+离线检测）+ AugmentDetailBottomSheet
+> 变更记录：v1.5.1 M5 Task 11 完成：套装进度 API（synergy-progress）+ 智能推荐 API（recommend）；Android SynergyProgressSection + AugmentRecommendFragment
 
 ---
 
@@ -1077,6 +1077,7 @@ public class TokenStore {
 | 1.3.0 | 2026-05-12 | 新增 TDD 测试驱动开发规范（QA-007~QA-014）；修复 M4 模块循环依赖问题（DTO 移至 core-network）；JWT Token Type 安全漏洞代码修复；HeroListFragment 完整实现；PH-003 测试覆盖检查项扩展 | 项目开发团队 |
 | 1.4.0 | 2026-05-13 | 新增 SYNC-010/011 离线缓存规范；PH-003 新增离线检测检查项；M4 英雄详情数据扩展（skills/counterTips/synergies/avgKDA/recommendedBuild）；M4 离线缓存逻辑实现（Room → Network → Update Room）；M4 离线模式检测（ConnectivityManager） | 项目开发团队 |
 | 1.5.0 | 2026-05-14 | M5 强化符文模块完成：后端 AugmentController + AugmentServiceImpl + AugmentDataInitializer（130个符文）；Android AugmentRepository + AugmentViewModel + AugmentListFragment（TabLayout+分页+离线检测）+ AugmentDetailBottomSheet | 项目开发团队 |
+| 1.5.1 | 2026-05-14 | M5 Task 11 完成：套装进度 API（synergy-progress）+ 智能推荐 API（recommend）；Android SynergyProgressSection + AugmentRecommendFragment | 项目开发团队 |
 
 ---
 

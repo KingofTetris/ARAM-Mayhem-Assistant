@@ -597,6 +597,20 @@ Android：gradlew :feature-hero:assembleDebug → BUILD SUCCESSFUL (15s)
 |------|------|------|
 | 51 | AugmentApi 返回类型使用 PageResponse | 后端分页响应结构与 Hero 模块一致 |
 | 52 | 强化符文使用 TabLayout 按品质筛选 | PRISMATIC/GOLD/SILVER 三档筛选 |
+| 53 | 套装进度使用 ProgressBar 展示 | 直观显示激活状态 |
+
+### 5.2.3 Task 11 套装追踪与智能推荐
+
+**后端 API**：
+1. `GET /api/augments/synergy-progress?augmentIds=1,2,3` - 获取各套装进度
+2. `POST /api/augments/recommend` - 根据英雄和已选符文推荐
+
+**Android 组件**：
+1. SynergyProgressResponse + AugmentRecommendRequest/Response DTO
+2. SynergyProgressViewModel + AugmentRecommendViewModel
+3. SynergyProgressAdapter - 横向进度展示
+4. AugmentRecommendAdapter - 推荐列表
+5. AugmentRecommendFragment - 英雄下拉 + 套装进度 + 推荐列表
 
 ## 5.3 技术问题与解决方案
 
