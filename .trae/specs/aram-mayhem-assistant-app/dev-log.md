@@ -2,8 +2,8 @@
 
 > 本文档按开发阶段分节记录所有关键操作、技术决策、问题与解决方案。
 > 最后更新：2026-05-13
-> 当前进度：M4 阶段进行中（后端完成 + Android 端 90%）
-> 文档版本：v2.1（2026-05-13 HeroDetailFragment 完成）
+> 当前进度：M4 阶段已完成 ✅
+> 文档版本：v2.2（2026-05-13 M4 遗漏任务全部完成）
 
 ---
 
@@ -14,7 +14,7 @@
 | M1 | 项目初始化 | ✅ 完成 | 100% | 12 模块脚手架 + 环境配置 + Git 仓库 |
 | M2 | 基础架构 | ✅ 完成 | 100% | MySQL 建模 + REST API + JWT 认证 |
 | M3 | Android UI 框架 | ✅ 完成 | 100% | 核心模块 + 8 组件 + 55 图标 + 规则文档 |
-| M4 | 英雄模块 | 🔵 进行中 | 90% | 后端完成 + HeroListFragment + HeroDetailFragment 完成 |
+| M4 | 英雄模块 | ✅ 完成 | 100% | 后端完成 + HeroListFragment + HeroDetailFragment + 离线缓存 + 测试 |
 | M5 | 强化符文模块 | ⏳ 待开始 | 0% | 依赖 M4 |
 | M6 | 社区模块 | ⏳ 待开始 | 0% | 依赖 M4+M5 |
 | M7 | 版本与公告 | ⏳ 待开始 | 0% | 依赖 M4 |
@@ -451,6 +451,69 @@ Android: gradlew :feature-hero:assembleDebug → BUILD SUCCESSFUL (16s)
 - Android 仓库：24 files changed, 2845 insertions, 22 deletions
 - 后端仓库：12 files changed, 1615 insertions, 4 deletions
 
+## 4.7 M4 遗漏任务补完
+
+**开始时间**：2026-05-13
+
+**实施内容**：
+
+1. **DataInitializer 英雄详情数据扩展**
+   - Hero 实体新增字段：description, skills(JSON), counterTips(JSON), synergies(JSON), avgKills, avgDeaths, avgAssists, recommendedBuild
+   - 使用 JacksonTypeHandler 处理 JSON 列（skills 为 List<SkillData>，counterTips/synergies 为 List<String>）
+   - DataInitializer 按角色生成模板化详情数据：
+     - 6 种角色 × 5 个技能名称/描述模板
+     - 6 种角色的克制提示/阵容搭配
+     - 6 种角色的推荐出装路线
+     - 按角色生成 KDA 数据（刺客击杀高、辅助助攻高等）
+
+2. **HeroServiceImpl 详情字段映射修复**
+   - convertToDetailVO 方法从 Hero 实体读取所有详情字段
+   - skills 转换为 HeroDetailVO.SkillInfo 列表
+   - counterTips/synergies 直接映射
+   - avgKills/avgDeaths/avgAssists/recommendedBuild 直接映射
+
+3. **HeroRepository 离线缓存逻辑实现**
+   - getHeroes()：网络请求成功 → 返回数据 + 异步写入 Room；失败 → 从 Room 缓存读取
+   - getHeroDetail()：网络请求成功 → 返回数据 + 异步写入 Room；失败 → 从 Room 缓存读取
+   - HeroEntity 扩展：新增 description/skills/counterTips/synergies/avgKills/avgDeaths/avgAssists/recommendedBuild
+   - SkillListConverter：Gson 序列化/反序列化 List<SkillData> 和 List<String>
+   - AppDatabase 版本升级 v1 → v2（fallbackToDestructiveMigration）
+
+4. **离线模式检测**
+   - HeroListFragment 注册 ConnectivityManager.NetworkCallback
+   - 网络断开：Snackbar 提示"网络已断开，正在显示缓存数据"
+   - 网络恢复：Snackbar 提示"网络已恢复" + 自动重新加载
+
+5. **HeroListViewModel/DetailViewModel 重构**
+   - 改为使用 HeroRepository 而非直接使用 HeroApi
+   - HeroListViewModel 新增 isOffline LiveData
+   - HeroDetailViewModel 新增 isOffline LiveData
+
+6. **HeroDetailViewModel 单元测试**
+   - 11 个测试用例：加载成功/失败/null、字段完整性、辅助方法、初始状态
+   - 使用 Mockito mock HeroRepository
+
+7. **HeroServiceTest 修复**
+   - 更新 createHero 方法设置详情字段
+   - 修复 description 断言（不再是 confidenceLevel 映射）
+   - 新增 counterTips/synergies/KDA/recommendedBuild 断言
+
+8. **数据库 DDL 变更**
+   - ALTER TABLE tb_hero 新增 8 列（description/skills/counter_tips/synergies/avg_kills/avg_deaths/avg_assists/recommended_build）
+
+**编译验证**：
+```
+后端：mvn test → Tests run: 47, Failures: 0, Errors: 0 — BUILD SUCCESS
+Android：gradlew :feature-hero:assembleDebug → BUILD SUCCESSFUL (15s)
+```
+
+**关键决策**：
+| 编号 | 决策 | 理由 |
+|------|------|------|
+| 48 | Hero 详情字段使用 JSON 列存储 | 避免 skills/counterTips/synergies 创建关联表，MyBatis Plus JacksonTypeHandler 原生支持 |
+| 49 | DataInitializer 按角色生成模板化数据 | 167 个英雄逐一编写不现实，按角色生成保证数据合理性 |
+| 50 | 离线缓存使用 Room + Repository 模式 | 网络优先 → 失败回退缓存，符合 Android 推荐架构 |
+
 ---
 
 # 全局决策索引
@@ -492,6 +555,9 @@ Android: gradlew :feature-hero:assembleDebug → BUILD SUCCESSFUL (16s)
 | 45 | 模块间导航使用 OnHeroSelectedListener 接口 | M4 | 架构 |
 | 46 | 跨模块资源引用使用完整包名 | M4 | 构建 |
 | 47 | HeroApi 返回类型改为 HeroDetailResponse | M4 | 网络 |
+| 48 | Hero 详情字段使用 JSON 列存储 | M4 | 数据库 |
+| 49 | DataInitializer 按角色生成模板化数据 | M4 | 数据 |
+| 50 | 离线缓存使用 Room + Repository 模式 | M4 | 架构 |
 
 ---
 
