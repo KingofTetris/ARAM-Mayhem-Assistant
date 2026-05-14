@@ -792,6 +792,9 @@ public class TokenStore {
 | 决策29 | TokenStore EncryptedSharedPreferences | Token 是敏感凭证，需加密存储 |
 | 决策31 | TokenRefreshInterceptor 独立 OkHttpClient | 避免循环调用导致死锁 |
 | 决策38 | JWT Token Type 校验 | 防止 Access Token 被滥用为 Refresh Token |
+| 决策51 | 套装进度使用 ProgressBar 展示 | 直观显示当前 count/total 进度 |
+| 决策52 | 推荐列表按评分降序排序 | 用户优先选择高评分符文 |
+| 决策53 | Augment 模块测试策略 | Service 层 Mockito + ViewModel 层 LiveData 测试 |
 
 ---
 

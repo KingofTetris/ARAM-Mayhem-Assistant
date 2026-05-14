@@ -2,103 +2,103 @@
 
 ## 阶段一：项目初始化（M1）
 
-- [ ] Task 1: 项目脚手架搭建
-  - [ ] 1.1 使用 Android Studio 创建 Java + XML 项目（package: com.aram.mayhem，JDK 21）
-  - [ ] 1.2 配置 Gradle（Groovy DSL），统一管理依赖版本
-  - [ ] 1.3 使用 Spring Initializr 创建 Spring Boot 3.x + Maven 后端项目（Java 21）
-  - [ ] 1.4 配置 Git 仓库与 .gitignore（含 Android 特有：*.apk、*.aab、build/、.gradle/）
-  - [ ] 1.5 编写 README 开发环境说明（Android Studio 版本、JDK 21、MySQL 8.0、Redis）
-  - [ ] 1.6 配置 Checkstyle + SpotBugs（Android 与后端统一 Java 代码规范）
+- [x] Task 1: 项目脚手架搭建
+  - [x] 1.1 使用 Android Studio 创建 Java + XML 项目（package: com.aram.mayhem，JDK 21）
+  - [x] 1.2 配置 Gradle（Groovy DSL），统一管理依赖版本
+  - [x] 1.3 使用 Spring Initializr 创建 Spring Boot 3.x + Maven 后端项目（Java 21）
+  - [x] 1.4 配置 Git 仓库与 .gitignore（含 Android 特有：*.apk、*.aab、build/、.gradle/）
+  - [x] 1.5 编写 README 开发环境说明（Android Studio 版本、JDK 21、MySQL 8.0、Redis）
+  - [x] 1.6 配置 Checkstyle + SpotBugs（Android 与后端统一 Java 代码规范）
 
-- [ ] Task 2: 开发环境与工具链配置
-  - [ ] 2.1 配置 Gradle 多模块项目结构（app + core + feature + navigation）
-  - [ ] 2.2 后端配置 Maven pom.xml：Spring Boot 3.x + MyBatis Plus + Spring Security + jjwt
-  - [ ] 2.3 后端配置 application.yml（MySQL 连接、Redis 连接、JWT 密钥，MySQL 绑定 127.0.0.1:3306）
-  - [ ] 2.4 Android 配置 ViewBinding + Navigation Component + Hilt
-  - [ ] 2.5 配置 MySQL 8.0 数据库 + Redis 服务
-  - [ ] 2.6 本地网络配置：创建 Android `network_security_config.xml`（允许局域网 IP 段明文 HTTP 流量），在 `AndroidManifest.xml` 中引用 `android:networkSecurityConfig="@xml/network_security_config"`；设置 Windows 防火墙入站规则开放 8080 端口；配置路由器 DHCP 静态 IP 绑定（或开发计算机静态 IP）确保 IP 不漂移
-  - [ ] 2.7 在 `core-common/Constants.java` 中定义 `BASE_URL = "http://<LOCAL_PC_IP>:8080/"` 指向开发计算机局域网 IP，附带注释说明如何根据实际网络环境修改
+- [x] Task 2: 开发环境与工具链配置
+  - [x] 2.1 配置 Gradle 多模块项目结构（app + core + feature + navigation）
+  - [x] 2.2 后端配置 Maven pom.xml：Spring Boot 3.x + MyBatis Plus + Spring Security + jjwt
+  - [x] 2.3 后端配置 application.yml（MySQL 连接、Redis 连接、JWT 密钥，MySQL 绑定 127.0.0.1:3306）
+  - [x] 2.4 Android 配置 ViewBinding + Navigation Component + Hilt
+  - [x] 2.5 配置 MySQL 8.0 数据库 + Redis 服务
+  - [x] 2.6 本地网络配置：创建 Android `network_security_config.xml`（允许局域网 IP 段明文 HTTP 流量），在 `AndroidManifest.xml` 中引用 `android:networkSecurityConfig="@xml/network_security_config"`；设置 Windows 防火墙入站规则开放 8080 端口；配置路由器 DHCP 静态 IP 绑定（或开发计算机静态 IP）确保 IP 不漂移
+  - [x] 2.7 在 `core-common/Constants.java` 中定义 `BASE_URL = "http://<LOCAL_PC_IP>:8080/"` 指向开发计算机局域网 IP，附带注释说明如何根据实际网络环境修改
 
 ## 阶段二：基础架构（M2）
 
-- [ ] Task 3: MySQL 数据库建模
-  - [ ] 3.1 编写 init.sql：tb_user、tb_hero、tb_hero_modifier、tb_augment、tb_strategy、tb_strategy_augment、tb_strategy_item、tb_vote、tb_bulletin
-  - [ ] 3.2 执行 SQL 建表 + 索引创建，验证表结构正确
-  - [ ] 3.3 编写 Spring Boot 启动时自动执行 DataInitializer 种子数据（预置英雄和强化符文）
-  - [ ] 3.4 创建 MyBatis Plus Entity 类（@TableName/@TableId/@TableField）+ Mapper 接口（BaseMapper）：User、Hero、HeroModifier、Augment、Strategy、Vote、Bulletin
+- [x] Task 3: MySQL 数据库建模
+  - [x] 3.1 编写 init.sql：tb_user、tb_hero、tb_hero_modifier、tb_augment、tb_strategy、tb_strategy_augment、tb_strategy_item、tb_vote、tb_bulletin
+  - [x] 3.2 执行 SQL 建表 + 索引创建，验证表结构正确
+  - [x] 3.3 编写 Spring Boot 启动时自动执行 DataInitializer 种子数据（预置英雄和强化符文）
+  - [x] 3.4 创建 MyBatis Plus Entity 类（@TableName/@TableId/@TableField）+ Mapper 接口（BaseMapper）：User、Hero、HeroModifier、Augment、Strategy、Vote、Bulletin
 
-- [ ] Task 4: 后端 RESTful API 框架
-  - [ ] 4.1 配置 Spring MVC + WebMvcConfigurer（CORS 跨域）
-  - [ ] 4.2 实现统一响应体 Result<T>（code、message、data、timestamp）+ 全局异常处理器 @RestControllerAdvice
-  - [ ] 4.3 实现请求参数校验（@Valid + Jakarta Validation 注解）
-  - [ ] 4.4 配置 Spring Data Redis + RedisTemplate 缓存工具类
-  - [ ] 4.5 配置 SpringDoc OpenAPI（Swagger UI 访问 /swagger-ui.html）
+- [x] Task 4: 后端 RESTful API 框架
+  - [x] 4.1 配置 Spring MVC + WebMvcConfigurer（CORS 跨域）
+  - [x] 4.2 实现统一响应体 Result<T>（code、message、data、timestamp）+ 全局异常处理器 @RestControllerAdvice
+  - [x] 4.3 实现请求参数校验（@Valid + Jakarta Validation 注解）
+  - [x] 4.4 配置 Spring Data Redis + RedisTemplate 缓存工具类
+  - [x] 4.5 配置 SpringDoc OpenAPI（Swagger UI 访问 /swagger-ui.html）
 
-- [ ] Task 5: Spring Security + JWT 认证
-  - [ ] 5.1 实现 UserDetailsService + BCryptPasswordEncoder
-  - [ ] 5.2 实现注册接口（POST /api/auth/register）：邮箱唯一性校验 + 密码 BCrypt 加密
-  - [ ] 5.3 实现登录接口（POST /api/auth/login）：验证凭证 → 生成 Access Token（15min）+ Refresh Token（7d）
-  - [ ] 5.4 实现 JwtTokenProvider 工具类（jjwt 生成/解析/验证 Token）
-  - [ ] 5.5 实现 JwtAuthenticationFilter（OncePerRequestFilter 拦截请求校验 Token）
-  - [ ] 5.6 配置 SecurityFilterChain：放开 /api/auth/**，其余接口需认证
-  - [ ] 5.7 实现 Refresh Token 续期接口（POST /api/auth/refresh）
+- [x] Task 5: Spring Security + JWT 认证
+  - [x] 5.1 实现 UserDetailsService + BCryptPasswordEncoder
+  - [x] 5.2 实现注册接口（POST /api/auth/register）：邮箱唯一性校验 + 密码 BCrypt 加密
+  - [x] 5.3 实现登录接口（POST /api/auth/login）：验证凭证 → 生成 Access Token（15min）+ Refresh Token（7d）
+  - [x] 5.4 实现 JwtTokenProvider 工具类（jjwt 生成/解析/验证 Token）
+  - [x] 5.5 实现 JwtAuthenticationFilter（OncePerRequestFilter 拦截请求校验 Token）
+  - [x] 5.6 配置 SecurityFilterChain：放开 /api/auth/**，其余接口需认证
+  - [x] 5.7 实现 Refresh Token 续期接口（POST /api/auth/refresh）
 
 ## 阶段三：Android UI 框架（M3）
 
-- [ ] Task 6: Android 核心模块搭建
-  - [ ] 6.1 创建 core-network 模块：Retrofit2 + OkHttp4 + Gson 配置，读 `core-common` 的 `Constants.BASE_URL` 作为动态 Base URL（本地环境指向 `http://<LOCAL_PC_IP>:8080/`）；OkHttpClient.Builder 添加 `HttpLoggingInterceptor`（仅 debug build 启用 BODY 级别日志），配置连接超时 30s / 读超时 30s
-  - [ ] 6.2 实现 AuthInterceptor（Interceptor 实现类，自动注入 Authorization: Bearer <token>）
-  - [ ] 6.3 实现 TokenRefreshInterceptor（401 自动刷新 Token + 重放请求）
-  - [ ] 6.4 创建 core-data 模块：Room Database 基类 + EncryptedSharedPreferences Token 存储
-  - [ ] 6.5 创建 core-common 模块：Result<T>、Tier 枚举、Constants
-  - [ ] 6.6 创建 core-ui 模块：styles.xml、colors.xml、dimens.xml 主题资源
-  - [ ] 6.7 创建 navigation 模块：navigation_graph.xml + BottomNavigationView 路由
+- [x] Task 6: Android 核心模块搭建
+  - [x] 6.1 创建 core-network 模块：Retrofit2 + OkHttp4 + Gson 配置，读 `core-common` 的 `Constants.BASE_URL` 作为动态 Base URL（本地环境指向 `http://<LOCAL_PC_IP>:8080/`）；OkHttpClient.Builder 添加 `HttpLoggingInterceptor`（仅 debug build 启用 BODY 级别日志），配置连接超时 30s / 读超时 30s
+  - [x] 6.2 实现 AuthInterceptor（Interceptor 实现类，自动注入 Authorization: Bearer <token>）
+  - [x] 6.3 实现 TokenRefreshInterceptor（401 自动刷新 Token + 重放请求）
+  - [x] 6.4 创建 core-data 模块：Room Database 基类 + EncryptedSharedPreferences Token 存储
+  - [x] 6.5 创建 core-common 模块：Result<T>、Tier 枚举、Constants
+  - [x] 6.6 创建 core-ui 模块：styles.xml、colors.xml、dimens.xml 主题资源
+  - [x] 6.7 创建 navigation 模块：navigation_graph.xml + BottomNavigationView 路由
 
-- [ ] Task 7: 通用 Android 组件开发
-  - [ ] 7.1 开发 HeroCardAdapter + ItemHeroCardBinding（RecyclerView 头像 + 名称 + TierBadge + 胜率，12dp 圆角 CardView）
-  - [ ] 7.2 开发 AugmentCardAdapter：品质色边框（棱彩=GradientDrawable 金紫渐变、金=金黄、银=银灰）
-  - [ ] 7.3 开发 TierBadgeView 自定义 View（S+/S/A/B/C 五色标签）
-  - [ ] 7.4 开发 SearchToolbar 搜索栏组件（TextInputLayout + TextWatcher 防抖 300ms）
-  - [ ] 7.5 开发 PaginationScrollListener（RecyclerView.OnScrollListener 上滑加载更多）
-  - [ ] 7.6 开发 StatefulLayout 通用状态切换（Loading/Empty/Error/Content 四种状态）
-  - [ ] 7.7 开发 QualityChip 品质 Chip 组件（棱彩=紫金、金=金色、银=银色）
-  - [ ] 7.8 开发 BalanceBar 平衡修正条形图自定义 View（Canvas 自绘：绿/红/灰三色 + 数值文字）
+- [x] Task 7: 通用 Android 组件开发
+  - [x] 7.1 开发 HeroCardAdapter + ItemHeroCardBinding（RecyclerView 头像 + 名称 + TierBadge + 胜率，12dp 圆角 CardView）
+  - [x] 7.2 开发 AugmentCardAdapter：品质色边框（棱彩=GradientDrawable 金紫渐变、金=金黄、银=银灰）
+  - [x] 7.3 开发 TierBadgeView 自定义 View（S+/S/A/B/C 五色标签）
+  - [x] 7.4 开发 SearchToolbar 搜索栏组件（TextInputLayout + TextWatcher 防抖 300ms）
+  - [x] 7.5 开发 PaginationScrollListener（RecyclerView.OnScrollListener 上滑加载更多）
+  - [x] 7.6 开发 StatefulLayout 通用状态切换（Loading/Empty/Error/Content 四种状态）
+  - [x] 7.7 开发 QualityChip 品质 Chip 组件（棱彩=紫金、金=金色、银=银色）
+  - [x] 7.8 开发 BalanceBar 平衡修正条形图自定义 View（Canvas 自绘：绿/红/灰三色 + 数值文字）
 
 ## 阶段四：英雄模块（M4）
 
-- [ ] Task 8: 英雄列表页
-  - [ ] 8.1 实现 HeroController（GET /api/heroes?role=&tier=&search=&page=&size=）→ 返回分页数据
-  - [ ] 8.2 实现 HeroService + HeroMapper（MyBatis Plus LambdaQueryWrapper 动态查询 + Redis 缓存：列表 10min）
-  - [ ] 8.3 Android 创建 HeroApi Retrofit 接口 + HeroDao Room 操作
-  - [ ] 8.4 实现 HeroRepository（Android）：先返回 Room 缓存 → 网络请求 → 更新 Room → LiveData 推送
-  - [ ] 8.5 开发 HeroListFragment：RecyclerView 按 Tier 分组（StickyHeader 实现）
-  - [ ] 8.6 开发 HeroFilterFragment/Sheet：ChipGroup 定位筛选 + 梯级筛选联动
-  - [ ] 8.7 开发 HeroSearchView：debounce 300ms + 搜索结果即时展示
-  - [ ] 8.8 离线模式检测：ConnectivityManager 监听网络状态 → 无网络时展示 Room 缓存 + Snackbar 提示
+- [x] Task 8: 英雄列表页
+  - [x] 8.1 实现 HeroController（GET /api/heroes?role=&tier=&search=&page=&size=）→ 返回分页数据
+  - [x] 8.2 实现 HeroService + HeroMapper（MyBatis Plus LambdaQueryWrapper 动态查询 + Redis 缓存：列表 10min）
+  - [x] 8.3 Android 创建 HeroApi Retrofit 接口 + HeroDao Room 操作
+  - [x] 8.4 实现 HeroRepository（Android）：先返回 Room 缓存 → 网络请求 → 更新 Room → LiveData 推送
+  - [x] 8.5 开发 HeroListFragment：RecyclerView 按 Tier 分组（StickyHeader 实现）
+  - [x] 8.6 开发 HeroFilterFragment/Sheet：ChipGroup 定位筛选 + 梯级筛选联动
+  - [x] 8.7 开发 HeroSearchView：debounce 300ms + 搜索结果即时展示
+  - [x] 8.8 离线模式检测：ConnectivityManager 监听网络状态 → 无网络时展示 Room 缓存 + Snackbar 提示
 
-- [ ] Task 9: 英雄卡片详情页
-  - [ ] 9.1 实现 HeroController（GET /api/heroes/{id}）→ 含 modifiers + skillOrders + builds + recommendedAugments
-  - [ ] 9.2 开发 HeroDetailFragment 头部：CollapsingToolbarLayout + ImageView（Glide 加载头像）+ 梯级 + 定位 Chip + 胜率/登场率
-  - [ ] 9.3 开发 BalanceModifierSection：BalanceBar 自定义 View 循环渲染各项修正数据
-  - [ ] 9.4 开发 SkillOrderSection：HorizontalScrollView + 方案卡片（LinearLayout 动态 inflate）
-  - [ ] 9.5 开发 BuildSection：GridLayout 出门装 + 核心三件套 LinearLayout + 后期装备 FlexibleGrid
-  - [ ] 9.6 开发 RecommendedAugmentsSection：按品质分组 RecyclerView
+- [x] Task 9: 英雄卡片详情页
+  - [x] 9.1 实现 HeroController（GET /api/heroes/{id}）→ 含 modifiers + skillOrders + builds + recommendedAugments
+  - [x] 9.2 开发 HeroDetailFragment 头部：CollapsingToolbarLayout + ImageView（Glide 加载头像）+ 梯级 + 定位 Chip + 胜率/登场率
+  - [x] 9.3 开发 BalanceModifierSection：BalanceBar 自定义 View 循环渲染各项修正数据
+  - [x] 9.4 开发 SkillOrderSection：HorizontalScrollView + 方案卡片（LinearLayout 动态 inflate）
+  - [x] 9.5 开发 BuildSection：GridLayout 出门装 + 核心三件套 LinearLayout + 后期装备 FlexibleGrid
+  - [x] 9.6 开发 RecommendedAugmentsSection：按品质分组 RecyclerView
 
 ## 阶段五：强化符文模块（M5）
 
-- [ ] Task 10: 强化符文列表页
-  - [ ] 10.1 实现 AugmentController（GET /api/augments?quality=&synergySet=）
-  - [ ] 10.2 实现 AugmentService + AugmentMapper（MyBatis Plus + Redis 缓存 30min）
-  - [ ] 10.3 Android 创建 AugmentApi + AugmentDao + AugmentRepository
-  - [ ] 10.4 开发 AugmentListFragment：TabLayout 品质切换（棱彩/金/银 三 Tab）
-  - [ ] 10.5 开发 SynergySetFilterChips：水平 ChipGroup 九大套装筛选
-  - [ ] 10.6 开发 AugmentDetailDialog/BottomSheet：效果详解 + 套装归属 + 最佳英雄 RecyclerView
+- [x] Task 10: 强化符文列表页
+  - [x] 10.1 实现 AugmentController（GET /api/augments?quality=&synergySet=）
+  - [x] 10.2 实现 AugmentService + AugmentMapper（MyBatis Plus + Redis 缓存 30min）
+  - [x] 10.3 Android 创建 AugmentApi + AugmentDao + AugmentRepository
+  - [x] 10.4 开发 AugmentListFragment：TabLayout 品质切换（棱彩/金/银 三 Tab）
+  - [x] 10.5 开发 SynergySetFilterChips：水平 ChipGroup 九大套装筛选
+  - [x] 10.6 开发 AugmentDetailDialog/BottomSheet：效果详解 + 套装归属 + 最佳英雄 RecyclerView
 
-- [ ] Task 11: 套装追踪与智能推荐
-  - [ ] 11.1 实现 AugmentController（GET /api/augments/synergy-progress?augmentIds=1,2,3）
-  - [ ] 11.2 开发 SynergyProgressSection：按套装分组 ProgressBar + 激活效果说明
-  - [ ] 11.3 实现 AugmentController（POST /api/augments/recommend）：body { heroId, selectedAugmentIds[] } → 评分排序列表
-  - [ ] 11.4 开发 AugmentRecommendFragment：Spinner 英雄下拉搜索 + RecyclerView 推荐列表 + 点击选中更新进度
+- [x] Task 11: 套装追踪与智能推荐
+  - [x] 11.1 实现 AugmentController（GET /api/augments/synergy-progress?augmentIds=1,2,3）
+  - [x] 11.2 开发 SynergyProgressSection：按套装分组 ProgressBar + 激活效果说明
+  - [x] 11.3 实现 AugmentController（POST /api/augments/recommend）：body { heroId, selectedAugmentIds[] } → 评分排序列表
+  - [x] 11.4 开发 AugmentRecommendFragment：Spinner 英雄下拉搜索 + RecyclerView 推荐列表 + 点击选中更新进度
 
 ## 阶段六：社区模块（M6）
 
