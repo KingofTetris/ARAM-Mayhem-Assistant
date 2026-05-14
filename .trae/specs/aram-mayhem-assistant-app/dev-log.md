@@ -1,9 +1,9 @@
 # ARAM Mayhem Assistant 开发日志
 
 > 本文档按开发阶段分节记录所有关键操作、技术决策、问题与解决方案。
-> 最后更新：2026-05-14
-> 当前进度：M5 阶段已完成 ✅
-> 文档版本：v2.3（2026-05-14 M5 强化符文模块完成）
+> 最后更新：2026-05-15
+> 当前进度：M6 社区模块 + 日志系统已完成 ✅
+> 文档版本：v2.4（2026-05-15 M6 社区模块 + 日志系统完成）
 
 ---
 
@@ -16,7 +16,7 @@
 | M3 | Android UI 框架 | ✅ 完成 | 100% | 核心模块 + 8 组件 + 55 图标 + 规则文档 |
 | M4 | 英雄模块 | ✅ 完成 | 100% | 后端完成 + HeroListFragment + HeroDetailFragment + 离线缓存 + 测试 |
 | M5 | 强化符文模块 | ✅ 完成 | 100% | 依赖 M4 |
-| M6 | 社区模块 | ⏳ 待开始 | 0% | 依赖 M4+M5 |
+| M6 | 社区模块 | ✅ 完成 | 100% | 社区浏览 + 玩法发布 + 投票 + 日志系统 |
 | M7 | 版本与公告 | ⏳ 待开始 | 0% | 依赖 M4 |
 | M8 | 个人中心 | ⏳ 待开始 | 0% | 依赖 M5+M6 |
 
@@ -711,3 +711,104 @@ Android：gradlew :feature-augment:assembleDebug → BUILD SUCCESSFUL (16s)
 | 16 | **TDD 不是可选项，是必选项** | M4-04/M4-05 |
 | 17 | **功能开发前必须先写测试用例** | M4-04/M4-05 |
 | 18 | 新 feature 模块需显式添加 Retrofit/OkHttp 依赖 | M5-01 |
+
+---
+
+# 第六阶段：社区模块 + 日志系统（M6）
+
+## 6.1 任务目标与范围
+
+- 后端：StrategyController + VoteController（社区浏览 + 玩法发布 + 投票）
+- Android：CommunityFeedFragment + StrategyDetailFragment + PublishStrategyFragment + VoteButton
+- 日志系统：后端 SLF4J + Logback + AOP 请求日志；Android Timber 日志框架
+- 修复 Hilt 依赖注入 Context 问题
+
+## 6.2 实施内容与关键决策
+
+### 6.2.1 后端社区模块
+
+**实施内容**：
+1. StrategyController：GET /api/strategies（分页+排序）+ GET /api/strategies/{id} + POST /api/strategies
+2. VoteController：POST /api/strategies/{id}/vote（UP/DOWN 投票）
+3. StrategyServiceImpl：hot 排序按 (upvotes-downvotes) DESC，latest 按 created_at DESC
+4. 投票去重：同一用户对同一玩法只能投一票
+
+### 6.2.2 Android 社区模块
+
+**实施内容**：
+1. CommunityFeedFragment：RecyclerView + PaginationScrollListener 无限滚动 + RadioGroup 排序切换
+2. StrategyDetailFragment：玩法详情 + VoteButton 投票组件
+3. PublishStrategyFragment：英雄搜索 + 强化多选 + 出装多选 + 文字描述
+4. VoteButton 自定义组件：ImageButton 上/下箭头 + 点击变色 + 计数即时更新
+5. OnStrategyClickListener 回调接口：解决 feature 模块无法访问 app 导航资源问题
+
+**关键决策**：
+| 编号 | 决策 | 理由 |
+|------|------|------|
+| 54 | 使用回调接口替代直接 Fragment 导航 | feature 模块不依赖 app 模块，无法访问 navigation_graph |
+| 55 | VoteButton 继承 LinearLayout | 组合布局比自定义 View 更灵活 |
+| 56 | CommunityFeedFragment 使用 RadioGroup 排序 | 比 TabLayout 更轻量，适合 2-3 个选项 |
+
+### 6.2.3 日志系统
+
+**实施内容**：
+
+1. **后端日志（SLF4J + Logback + AOP）**
+   - logback-spring.xml：3 个 Appender（CONSOLE + FILE_APP + FILE_ERROR）
+   - 按日期+大小滚动（50MB/文件，30天保留，1GB 总量上限）
+   - Spring Profile 区分 local（控制台+文件）和 prod（仅文件）
+   - RequestLoggingInterceptor：请求进入/完成日志（方法+URI+状态码+耗时+客户端IP）
+   - ServiceLoggingAspect：AOP 切面自动记录 Service 层方法调用（进入/成功/异常）
+   - WebMvcConfig：注册拦截器，排除 /api/auth/** 避免泄露认证信息
+   - AuthService：显式日志记录登录/注册/刷新 Token 的关键操作
+   - StrategyServiceImpl：显式日志记录玩法创建和投票
+   - HeroServiceImpl/AugmentServiceImpl：显式日志记录关键查询
+   - GlobalExceptionHandler：增强所有异常日志（Validation/Constraint/Business/Unknown）
+
+2. **Android 日志（Timber）**
+   - 添加 timber 5.0.1 依赖
+   - MayhemApplication 初始化 Timber（Debug 模式用 DebugTree，Release 模式用 ReleaseTree）
+   - ReleaseTree 仅记录 WARN 及以上级别（预留远程日志上报接口）
+
+**关键决策**：
+| 编号 | 决策 | 理由 |
+|------|------|------|
+| 57 | 后端使用 AOP 切面自动记录 Service 日志 | 避免手动在每个方法添加日志，减少遗漏 |
+| 58 | 请求拦截器排除 /api/auth/** | 避免记录登录密码等敏感信息 |
+| 59 | 错误日志单独文件 aram-server-error.log | 便于快速定位线上问题 |
+| 60 | Android 使用 Timber 而非原生 Log | Timber 自动获取类名/方法名，Release 可移除 Debug 日志 |
+
+### 6.2.4 Hilt 依赖注入修复
+
+**实施内容**：
+1. DataModule.provideAppDatabase：添加 @ApplicationContext 注解
+2. 创建 AppModule（app 模块）：显式提供 TokenStore（@ApplicationContext Context）
+3. 解决 Hilt 无法自动注入 Context 的问题
+
+## 6.3 技术问题与解决方案
+
+| 编号 | 问题 | 根因 | 解决方案 | 严重度 |
+|------|------|------|----------|--------|
+| M6-01 | Hilt MissingBinding: Context cannot be provided | TokenStore 构造函数需要 Context 但无 @ApplicationContext | 创建 AppModule 显式提供 @ApplicationContext Context | 🔴 |
+| M6-02 | feature-community 缺少 SwipeRefreshLayout 依赖 | build.gradle 未声明 | 添加 swiperefreshlayout 依赖 | 🟠 |
+| M6-03 | feature-community 缺少 Retrofit 依赖 | 新 feature 模块需显式添加 | 添加 Retrofit + converter-gson 依赖 | 🟠 |
+| M6-04 | VoteButton R 类引用错误 | 包名从 feature.community.ui 改为 ui.widget | 更新 R 类导入 | 🟠 |
+| M6-05 | StrategyDetailResponse 缺少 setter 方法 | DTO 未生成完整 setter | 手动添加 setUpvotes/setDownvotes | 🟡 |
+| M6-06 | CommunityFeedFragment 无法导航到详情页 | feature 模块无法访问 app 的 navigation action | 使用 OnStrategyClickListener 回调接口 | 🔴 |
+
+## 6.4 阶段成果与经验教训
+
+**交付物**：
+- 后端：StrategyController + VoteController + StrategyServiceImpl（社区 CRUD + 投票）
+- 后端：完整日志系统（logback-spring.xml + RequestLoggingInterceptor + ServiceLoggingAspect + WebMvcConfig）
+- 后端：5 个 Service/Controller 添加显式日志
+- Android：CommunityFeedFragment + StrategyDetailFragment + PublishStrategyFragment + VoteButton
+- Android：Timber 日志框架集成
+- Android：AppModule（Hilt Context 提供者）
+- 编译验证通过：后端 mvn compile ✅ + Android assembleDebug ✅
+
+**经验教训**：
+1. ⚠️ **Hilt @Inject 构造函数中的 Context 必须使用 @ApplicationContext 限定符**
+2. ⚠️ **feature 模块间导航必须通过回调接口，不能直接引用 app 资源**
+3. ⚠️ **日志系统应在项目初期就建立，而非后期补加**
+4. ✅ 建议：新项目初始化时就配置 Logback + AOP + Timber，避免后期补加遗漏

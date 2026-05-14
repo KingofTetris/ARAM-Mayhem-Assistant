@@ -1,10 +1,10 @@
 # ARAM Mayhem Assistant 项目开发规则
 
-> 版本：1.5.2
-> 生效日期：2026-05-14
+> 版本：1.6.0
+> 生效日期：2026-05-15
 > 适用范围：ARAM Mayhem Assistant 全栈项目（Android 客户端 + Spring Boot 后端）
 > 维护者：项目开发团队
-> 变更记录：v1.5.2 新增 git-commit-guide.md Git提交问题清单与规范；更新 CO-008 规则要求详细说明必须包含修改内容、涉及模块、解决问题、相关任务
+> 变更记录：v1.6.0 新增 BE-015~BE-021 日志规范（SLF4J+Logback+AOP+Timber）
 
 ---
 
@@ -347,6 +347,48 @@ if (!"refresh".equals(tokenType)) {
 config.setAllowedOriginPatterns(List.of("*"));
 config.setAllowCredentials(true);
 ```
+
+### 4.5 日志规范 [P0 🔴]
+
+**规则 BE-015**：后端必须使用 SLF4J + Logback 日志框架，禁止使用 `System.out.println()` 或 `e.printStackTrace()`。
+
+理由：生产环境需要结构化日志、文件滚动、级别过滤，stdout/printStackTrace 无法满足运维需求。
+
+**规则 BE-016**：后端必须配置 `logback-spring.xml`，包含以下 Appender：
+
+| Appender | 用途 | 目标 |
+|----------|------|------|
+| CONSOLE | 开发调试 | 控制台 |
+| FILE_APP | 全量日志 | `logs/aram-server.log` |
+| FILE_ERROR | 错误日志 | `logs/aram-server-error.log` |
+
+日志文件必须配置按日期+大小滚动（单文件 ≤50MB，保留 30 天，总量 ≤1GB）。
+
+**规则 BE-017**：后端必须使用 AOP 切面自动记录 Service 层方法调用日志，禁止手动在每个方法添加 debug 级别日志。
+
+```java
+@Aspect
+@Component
+public class ServiceLoggingAspect {
+    @Pointcut("execution(* com.aram.mayhem.service.impl..*.*(..))")
+    public void serviceLayer() {}
+
+    @Around("serviceLayer()")
+    public Object logServiceMethod(ProceedingJoinPoint joinPoint) throws Throwable {
+        // 自动记录方法进入/成功/异常
+    }
+}
+```
+
+**规则 BE-018**：后端请求日志拦截器必须排除 `/api/auth/**` 路径，禁止记录登录密码等敏感信息。
+
+**规则 BE-019**：后端关键业务操作（登录、注册、Token 刷新、玩法创建、投票）必须添加显式 INFO/WARN 级别日志，包含操作类型和关键参数（禁止记录密码、Token 值）。
+
+**规则 BE-020**：Android 必须使用 Timber 日志框架，禁止直接使用 `android.util.Log`。
+
+理由：Timber 自动获取调用位置，Release 构建可自动移除 Debug 日志，且支持自定义 Tree 扩展。
+
+**规则 BE-021**：Android Application 必须在 `onCreate()` 中初始化 Timber，Debug 模式使用 `Timber.DebugTree()`，Release 模式使用自定义 Tree（仅记录 WARN 及以上级别）。
 
 ---
 
