@@ -2,8 +2,8 @@
 
 > 本文档按开发阶段分节记录所有关键操作、技术决策、问题与解决方案。
 > 最后更新：2026-05-15
-> 当前进度：M6 社区模块 + 日志系统已完成 ✅
-> 文档版本：v2.4（2026-05-15 M6 社区模块 + 日志系统完成）
+> 当前进度：M7 版本与公告模块已完成 ✅
+> 文档版本：v2.5（2026-05-15 M7 版本与公告模块完成）
 
 ---
 
@@ -17,7 +17,7 @@
 | M4 | 英雄模块 | ✅ 完成 | 100% | 后端完成 + HeroListFragment + HeroDetailFragment + 离线缓存 + 测试 |
 | M5 | 强化符文模块 | ✅ 完成 | 100% | 依赖 M4 |
 | M6 | 社区模块 | ✅ 完成 | 100% | 社区浏览 + 玩法发布 + 投票 + 日志系统 |
-| M7 | 版本与公告 | ⏳ 待开始 | 0% | 依赖 M4 |
+| M7 | 版本与公告 | ✅ 完成 | 100% | 公告列表+轮播+版本陷阱+强度说明 |
 | M8 | 个人中心 | ⏳ 待开始 | 0% | 依赖 M5+M6 |
 
 ---
@@ -738,9 +738,10 @@ Android：gradlew :feature-augment:assembleDebug → BUILD SUCCESSFUL (16s)
 **实施内容**：
 1. CommunityFeedFragment：RecyclerView + PaginationScrollListener 无限滚动 + RadioGroup 排序切换
 2. StrategyDetailFragment：玩法详情 + VoteButton 投票组件
-3. PublishStrategyFragment：英雄搜索 + 强化多选 + 出装多选 + 文字描述
+3. PublishStrategyFragment：英雄搜索 + 强化多选 + 出装多选 + 文字描述 + 未登录拦截
 4. VoteButton 自定义组件：ImageButton 上/下箭头 + 点击变色 + 计数即时更新
 5. OnStrategyClickListener 回调接口：解决 feature 模块无法访问 app 导航资源问题
+6. 未登录拦截：PublishStrategyFragment 启动时检查 TokenStore.hasToken()，未登录则 Toast 提示并返回上一级
 
 **关键决策**：
 | 编号 | 决策 | 理由 |
@@ -812,3 +813,126 @@ Android：gradlew :feature-augment:assembleDebug → BUILD SUCCESSFUL (16s)
 2. ⚠️ **feature 模块间导航必须通过回调接口，不能直接引用 app 资源**
 3. ⚠️ **日志系统应在项目初期就建立，而非后期补加**
 4. ✅ 建议：新项目初始化时就配置 Logback + AOP + Timber，避免后期补加遗漏
+
+---
+
+# 第七阶段：版本与公告模块（M7）
+
+## 7.1 任务目标与范围
+
+- 后端：公告管理接口（列表/详情/最新公告）
+- 后端：版本陷阱标记接口（管理员标记英雄/符文为版本陷阱）
+- 后端：Hero/Augment 实体新增 isVersionTrap + versionTrapSince 字段
+- Android：公告列表页（BulletinListFragment + TabLayout 分类筛选 + 分页）
+- Android：公告轮播组件（BulletinCarouselView 自动轮播 + 指示器）
+- Android：版本陷阱横幅（VersionTrapBanner 红色警告）
+- Android：强度等级说明页（StrongLevelExplainFragment）
+- Android：单元测试（BulletinListViewModelTest + BulletinAdapterDiffCallbackTest + HeroDetailUiModelVersionTrapTest）
+- 伴生任务：project_rules.md v1.7.0 + dev-log.md + tasks.md + checklist.md
+
+## 7.2 实施内容与关键决策
+
+### 7.2.1 后端公告与版本陷阱
+
+**实施内容**：
+1. 新增 `BulletinController`：公告列表（分页+类型筛选+置顶优先）、最新公告（limit=3）、公告详情
+2. 新增 `BulletinService` + `BulletinServiceImpl`：公告查询逻辑，置顶优先排序
+3. 新增 `AdminController`：管理员标记/取消英雄版本陷阱、标记/取消符文版本陷阱
+4. 修改 `Hero` 实体：新增 `isVersionTrap`（Boolean）+ `versionTrapSince`（LocalDateTime）
+5. 修改 `Augment` 实体：新增 `isVersionTrap`（Boolean）+ `versionTrapSince`（LocalDateTime）
+6. 修改 `HeroListVO`：新增 `isVersionTrap` 字段
+7. 修改 `SecurityConfig`：公告接口 `permitAll()` + `@EnableMethodSecurity` 支持 `@PreAuthorize`
+8. 新增 DTO：`BulletinListVO`、`BulletinDetailVO`、`TrapMarkRequest`
+
+**关键决策**：
+| 编号 | 决策 | 理由 |
+|------|------|------|
+| 54 | 公告接口公开访问 | 公告面向所有用户，未登录也应可查看 |
+| 55 | 版本陷阱使用 @PreAuthorize ADMIN | 防止恶意标记导致用户误导 |
+| 56 | 置顶优先排序 | 重要公告（版本更新/紧急通知）需优先展示 |
+| 57 | versionTrapSince 记录标记时间 | 便于追踪陷阱生效时间和历史分析 |
+
+### 7.2.2 Android 公告与版本陷阱
+
+**实施内容**：
+1. 新增 `BulletinApi`（Retrofit 接口）：getBulletins / getLatestBulletins / getBulletinDetail
+2. 新增 `BulletinResponse` DTO
+3. 新增 `BulletinUiModel`：含 typeDisplay() 方法（version→版本更新，event→活动，notice→通知）
+4. 新增 `BulletinListViewModel`：轮播数据 + 列表数据 + 分页加载 + 类型筛选
+5. 新增 `BulletinCarouselView`：ViewPager2 自动轮播 + 指示器 + 5秒间隔
+6. 新增 `VersionTrapBanner`：红色背景 + 警告图标 + 版本信息
+7. 新增 `BulletinAdapter`：ListAdapter + DiffUtil + 置顶标记
+8. 重写 `BulletinListFragment`：TabLayout 分类 + 轮播 + 列表 + 错误/加载状态
+9. 新增 `StrongLevelExplainFragment`：S+/S/A/B/C 等级说明 + 版本陷阱说明
+10. 修改 `HeroDetailUiModel`：新增 versionTrap 字段 + 兼容旧构造函数
+11. 修改 `HeroDetailResponse`：新增 isVersionTrap 字段
+12. 修改 `HeroEntity`：新增 isVersionTrap 字段
+13. 修改 `HeroRepository`：convertToDetailUiModel 传递 isVersionTrap
+14. 修改 `HeroDetailFragment`：updateVersionTrapBanner 显示红色警告横幅
+15. 修改 `NetworkModule`：注册 BulletinApi
+16. 更新 `fragment_hero_detail.xml`：添加 VersionTrapBanner
+
+### 7.2.3 单元测试
+
+**后端测试**：
+- `BulletinServiceTest`：公告列表查询、最新公告查询、公告详情查询、公告不存在异常
+- `BulletinControllerTest`：公告列表接口、最新公告接口、公告详情接口
+
+**Android 测试**：
+- `BulletinListViewModelTest`：初始状态验证、API 调用参数验证、加载中防重复请求、BulletinUiModel 字段验证、getTypeDisplay 映射验证
+- `BulletinAdapterDiffCallbackTest`：areItemsTheSame / areContentsTheSame 验证
+- `HeroDetailUiModelVersionTrapTest`：versionTrap 字段验证、新旧构造函数兼容性
+
+## 7.3 技术问题与解决方案
+
+暂无重大问题。
+
+## 7.4 阶段成果与经验教训
+
+**交付物**：
+- 后端：BulletinController + BulletinServiceImpl + AdminController + SecurityConfig 更新
+- 后端：Hero/Augment 实体新增 isVersionTrap + versionTrapSince
+- 后端：BulletinServiceTest + BulletinControllerTest
+- Android：BulletinApi + BulletinResponse + BulletinUiModel + BulletinListViewModel
+- Android：BulletinCarouselView + VersionTrapBanner + BulletinAdapter
+- Android：BulletinListFragment（完整重写）+ StrongLevelExplainFragment
+- Android：HeroDetailFragment 新增 VersionTrapBanner 显示
+- Android：BulletinListViewModelTest + BulletinAdapterDiffCallbackTest + HeroDetailUiModelVersionTrapTest
+- 文档：project_rules.md v1.7.0（BE-022/023 + AD-016/017）
+
+**经验教训**：
+1. ✅ 自定义轮播组件需严格管理 Handler 生命周期（onAttachedToWindow/onDetachedFromWindow + Fragment.onDestroyView）
+2. ✅ UiModel 新增字段时需提供兼容旧构造函数的重载，避免已有调用点全部报错
+3. ✅ Room Entity 新增字段时需同步更新 Repository 的转换方法
+4. ⚠️ **Android 编译问题频发的根因分析**（详见下方专题）
+
+### 7.5 Android 编译问题频发根因分析
+
+M7 编译验证过程中 Android 端出现了 5 轮编译错误，后端 0 轮。回顾整个项目历史，Android 端编译问题远多于后端，根因如下：
+
+**一、架构复杂度差异**
+
+| 维度 | Android | Spring Boot |
+|------|---------|-------------|
+| 模块数 | 11 个 Gradle 模块 | 1 个 Maven 模块 |
+| 依赖管理 | 模块间 implementation 依赖，需手动声明 | Spring Boot Starter 自动传递 |
+| 资源系统 | XML 布局 + ViewBinding 生成 + R 资源合并 | 无资源系统 |
+| 构建工具 | Gradle + AGP（Android Gradle Plugin） | Maven + maven-compiler-plugin |
+
+**二、Android 特有的编译问题类型**
+
+1. **依赖传递断裂**：`feature-bulletin` 使用了 Retrofit/Glide/Timber，但 `build.gradle` 未声明依赖。Java 模块间 `implementation` 不传递，必须每个模块显式声明。后端 Spring Boot Starter 自动传递依赖，不存在此问题。
+2. **资源引用不存在**：布局 XML 中引用 `@drawable/ic_arrow_back`、`@color/primary_light` 等不存在的资源。AAPT 在资源合并阶段才报错，而非编写时。后端无资源系统。
+3. **ViewBinding 类型不匹配**：`ItemTierExplainBinding` 是 ViewBinding 自动生成的类，不能当作 `View` 使用。这种类型错误在 IDE 中可能不立即提示。
+4. **跨模块 R 资源引用**：feature 模块不能引用 `com.aram.mayhem.R`（app 模块的 R 类），必须通过回调接口或事件通信。后端无此限制。
+5. **API 类型不一致**：后端返回 `Integer`（isPinned），Android UiModel 定义为 `boolean`，中间缺少转换逻辑。后端自洽，不存在跨端类型映射问题。
+
+**三、改进措施**
+
+| 编号 | 措施 | 预期效果 |
+|------|------|----------|
+| 1 | 新建模块时立即声明所有可能用到的依赖（参考同模块 build.gradle） | 消除依赖缺失编译错误 |
+| 2 | 布局 XML 只引用 `core-ui` 中已确认存在的资源 | 消除资源不存在错误 |
+| 3 | 新建 Fragment 时先写空壳编译通过，再逐步填充逻辑 | 尽早发现类型/资源问题 |
+| 4 | DTO→UiModel 转换时统一使用工具方法处理类型差异（Integer→boolean 等） | 消除类型转换错误 |
+| 5 | feature 模块间通信统一使用回调接口，禁止跨模块 R 引用 | 消除跨模块引用错误 |

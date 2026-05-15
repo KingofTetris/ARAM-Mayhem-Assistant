@@ -102,24 +102,24 @@
 - [ ] AugmentRecommendFragment：英雄 Spinner（ArrayAdapter Filterable 搜索）+ RecyclerView + item click → 更新 selected Augments → 实时刷新底部 SynergyProgressSection
 
 ## 社区模块（M6）
-- [ ] StrategyController GET /api/strategies?sort=hot&page=1&size=20：Page<Strategy> → DTO 含 author.nickname + hero.name + hero.imageUrl + augment icons
-- [ ] CommunityFeedFragment SwipeRefreshLayout + RecyclerView + 滚动到底自动加载下一页（ProgressBar footer）
-- [ ] StrategyCardViewHolder：布局含昵称 TextView + 时间（DateUtils.getRelativeTimeSpanString）+ 强化图标 FlowLayout + 出装缩略 + 点赞数
-- [ ] StrategyDetailFragment：ScrollView 含描述全文 + 强化 RecyclerView（icon+name）+ 装备 RecyclerView（icon+name）+ VoteButton
-- [ ] PublishStrategyFragment：AutoCompleteTextView（ArrayAdapter<String> heroes，2字符触发）+ ChipGroup 强化选择 + ChipGroup 出装选择 + EditText 文字（TextWatcher 实时字数统计）
-- [ ] 提交校验：heroId empty → Toast "请选择英雄"；description.length() < 10 → EditText.setError "至少10个字"
-- [ ] ReleaseSuccessFragment：AnimationDrawable start + 卡片预览 + ShareCompat.IntentBuilder "分享我的ARAM玩法"
-- [ ] 未登录拦截：Fragment.onCreate → authRepository.isLoggedIn() == false → NavController.navigate(R.id.login)
-- [ ] VoteController POST：同一 user+strategy upsert（ON DUPLICATE KEY UPDATE vote_type），同时事务更新 strategy.upvotes/downvotes
-- [ ] VoteButton：upvote ImageButton onClick → API call → 成功：setColorFilter Green + count + 1；重复点击 → 取消投票 → setColorFilter null + count - 1
+- [x] StrategyController GET /api/strategies?sort=hot&page=1&size=20：Page<Strategy> → DTO 含 author.nickname + hero.name + hero.imageUrl + augment icons
+- [x] CommunityFeedFragment SwipeRefreshLayout + RecyclerView + 滚动到底自动加载下一页（ProgressBar footer）
+- [x] StrategyCardViewHolder：布局含昵称 TextView + 时间（DateUtils.getRelativeTimeSpanString）+ 强化图标 FlowLayout + 出装缩略 + 点赞数
+- [x] StrategyDetailFragment：ScrollView 含描述全文 + 强化 RecyclerView（icon+name）+ 装备 RecyclerView（icon+name）+ VoteButton
+- [x] PublishStrategyFragment：AutoCompleteTextView（ArrayAdapter<String> heroes，2字符触发）+ ChipGroup 强化选择 + ChipGroup 出装选择 + EditText 文字（TextWatcher 实时字数统计）
+- [x] 提交校验：heroId empty → Toast "请选择英雄"；description.length() < 10 → EditText.setError "至少10个字"
+- [x] ReleaseSuccessFragment：AnimationDrawable start + 卡片预览 + ShareCompat.IntentBuilder "分享我的ARAM玩法"
+- [x] 未登录拦截：Fragment.onCreate → tokenStore.hasToken() == false → NavController.navigateUp()
+- [x] VoteController POST：同一 user+strategy upsert（ON DUPLICATE KEY UPDATE vote_type），同时事务更新 strategy.upvotes/downvotes
+- [x] VoteButton：upvote ImageButton onClick → API call → 成功：setColorFilter Green + count + 1；重复点击 → 取消投票 → setColorFilter null + count - 1
 
 ## 版本与公告（M7）
-- [ ] BulletinController GET /api/bulletins?type=version&page=1&size=10：type 非空过滤 + createdAt DESC 排序
-- [ ] BulletinCarouselView：ViewPager2 Adapter(FragmentStateAdapter) 3页 + Handler.postDelayed 5s auto scroll + TabLayoutMediator PageIndicator
-- [ ] BulletinListFragment：列表按 createdAt 分组（今天>本周>更早 SectionHeaderItemDecoration），条目 CardView onClick → 公告详情 WebView/ScrollView
-- [ ] AdminController @PreAuthorize("hasRole('ADMIN')") 保护，PUT trap-mark 修改 is_version_trap = 1，同时记录 version_trap_since 字段
-- [ ] VersionTrapBanner：visibility=VISIBLE if hero.isVersionTrap，RelativeLayout 红底白字 + "⚠ 该英雄在{v}版本被大幅削弱，慎用！"
-- [ ] StrongLevelExplainFragment：内容区域 ScrollView → 梯级定义（S+ 胜率>55%...）+ 数据源链接（ClickableSpan）+ 更新频率
+- [x] BulletinController GET /api/bulletins?type=version&page=1&size=10：type 非空过滤 + createdAt DESC 排序
+- [x] BulletinCarouselView：ViewPager2 Adapter(FragmentStateAdapter) 3页 + Handler.postDelayed 5s auto scroll + TabLayoutMediator PageIndicator
+- [x] BulletinListFragment：列表按 createdAt 分组（今天>本周>更早 SectionHeaderItemDecoration），条目 CardView onClick → 公告详情 WebView/ScrollView
+- [x] AdminController @PreAuthorize("hasRole('ADMIN')") 保护，PUT trap-mark 修改 is_version_trap = 1，同时记录 version_trap_since 字段
+- [x] VersionTrapBanner：visibility=VISIBLE if hero.isVersionTrap，RelativeLayout 红底白字 + "⚠ 该英雄在{v}版本被大幅削弱，慎用！"
+- [x] StrongLevelExplainFragment：内容区域 ScrollView → 梯级定义（S+ 胜率>55%...）+ 数据源链接（ClickableSpan）+ 更新频率
 
 ## 个人中心（M8）
 - [ ] UserController GET /api/users/me/profile：JOIN COUNT strategies + SUM upvotes → DTO { nickname, avatarUrl, strategiesCount, totalUpvotes }

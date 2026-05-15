@@ -102,30 +102,30 @@
 
 ## 阶段六：社区模块（M6）
 
-- [ ] Task 12: 玩法浏览页
-  - [ ] 12.1 实现 StrategyController（GET /api/strategies?sort=hot|latest&page=&size=）→ 含作者昵称、英雄头像、强化图标
-  - [ ] 12.2 实现 StrategyService：hot 按 (upvotes - downvotes) DESC，latest 按 created_at DESC
-  - [ ] 12.3 Android 创建 CommunityApi + StrategyRepository
-  - [ ] 12.4 开发 CommunityFeedFragment：RecyclerView + PaginationScrollListener 无限滚动
-  - [ ] 12.5 开发 StrategyCardViewHolder：英雄头像 + 昵称 + 时间 + 强化组合图标行 + 出装缩略 + 点赞数字
-  - [ ] 12.6 开发 StrategyDetailFragment：全文描述 + 强化列表 RecyclerView + 出装列表 RecyclerView + VoteButton
+- [x] Task 12: 玩法浏览页
+  - [x] 12.1 实现 StrategyController（GET /api/strategies?sort=hot|latest&page=&size=）→ 含作者昵称、英雄头像、强化图标
+  - [x] 12.2 实现 StrategyService：hot 按 (upvotes - downvotes) DESC，latest 按 created_at DESC
+  - [x] 12.3 Android 创建 CommunityApi + StrategyRepository
+  - [x] 12.4 开发 CommunityFeedFragment：RecyclerView + PaginationScrollListener 无限滚动
+  - [x] 12.5 开发 StrategyCardViewHolder：英雄头像 + 昵称 + 时间 + 强化组合图标行 + 出装缩略 + 点赞数字
+  - [x] 12.6 开发 StrategyDetailFragment：全文描述 + 强化列表 RecyclerView + 出装列表 RecyclerView + VoteButton
 
-- [ ] Task 13: 玩法发布与投票
-  - [ ] 13.1 实现 StrategyController（POST /api/strategies）→ @Valid 校验（heroId 必填、description 最少 10 字），保存后返回玩法详情
-  - [ ] 13.2 开发 PublishStrategyFragment：AutoCompleteTextView 英雄搜索 + 强化多选 Chip + 出装多选 Chip + EditText 文字
-  - [ ] 13.3 开发 ReleaseSuccessFragment：AnimationDrawable 动画 + 玩法预览卡片 + ShareIntent 分享
-  - [ ] 13.4 实现 VoteController（POST /api/strategies/{id}/vote）：body { voteType: "UP"/"DOWN" } → upsert 投票，更新玩法计数字段
-  - [ ] 13.5 开发 VoteButton 组件（ImageButton 上/下箭头）：点击变色 + 计数即时更新 + 重复点击取消
+- [x] Task 13: 玩法发布与投票
+  - [x] 13.1 实现 StrategyController（POST /api/strategies）→ @Valid 校验（heroId 必填、description 最少 10 字），保存后返回玩法详情
+  - [x] 13.2 开发 PublishStrategyFragment：AutoCompleteTextView 英雄搜索 + 强化多选 Chip + 出装多选 Chip + EditText 文字
+  - [x] 13.3 开发 ReleaseSuccessFragment：AnimationDrawable 动画 + 玩法预览卡片 + ShareIntent 分享
+  - [x] 13.4 实现 VoteController（POST /api/strategies/{id}/vote）：body { voteType: "UP"/"DOWN" } → upsert 投票，更新玩法计数字段
+  - [x] 13.5 开发 VoteButton 组件（ImageButton 上/下箭头）：点击变色 + 计数即时更新 + 重复点击取消
 
 ## 阶段七：版本与公告（M7）
 
-- [ ] Task 14: 公告系统与版本陷阱
-  - [ ] 14.1 实现 BulletinController（GET /api/bulletins?type=&page=&size=）→ 返回公告列表 + 首页最新 3 条
-  - [ ] 14.2 开发 BulletinCarouselView：首页 ViewPager2 + 自动轮播（Handler 5s 定时）+ PageIndicator
-  - [ ] 14.3 开发 BulletinListFragment：RecyclerView 按时间分组（Today/ThisWeek/Older SectionHeader）
-  - [ ] 14.4 实现 AdminController（管理后台接口：PUT /api/admin/heroes/{id}/trap-mark、PUT /api/admin/augments/{id}/trap-mark）→ 管理员角色校验
-  - [ ] 14.5 开发 VersionTrapBanner 组件（RelativeLayout 红色背景 + TextView + Warning Icon）→ 在 HeroDetailFragment 和 AugmentDetailDialog 顶部动态插入
-  - [ ] 14.6 开发 StrongLevelExplainFragment：ScrollView 展示梯级标准说明 + 数据来源 + 更新频率文字
+- [x] Task 14: 公告系统与版本陷阱
+  - [x] 14.1 实现 BulletinController（GET /api/bulletins?type=&page=&size=）→ 返回公告列表 + 首页最新 3 条
+  - [x] 14.2 开发 BulletinCarouselView：首页 ViewPager2 + 自动轮播（Handler 5s 定时）+ PageIndicator
+  - [x] 14.3 开发 BulletinListFragment：RecyclerView 按时间分组（Today/ThisWeek/Older SectionHeader）
+  - [x] 14.4 实现 AdminController（管理后台接口：PUT /api/admin/heroes/{id}/trap-mark、PUT /api/admin/augments/{id}/trap-mark）→ 管理员角色校验
+  - [x] 14.5 开发 VersionTrapBanner 组件（RelativeLayout 红色背景 + TextView + Warning Icon）→ 在 HeroDetailFragment 和 AugmentDetailDialog 顶部动态插入
+  - [x] 14.6 开发 StrongLevelExplainFragment：ScrollView 展示梯级标准说明 + 数据来源 + 更新频率文字
 
 ## 阶段八：个人中心（M8）
 

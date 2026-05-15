@@ -1,10 +1,10 @@
 # ARAM Mayhem Assistant 项目开发规则
 
-> 版本：1.6.0
+> 版本：1.7.0
 > 生效日期：2026-05-15
 > 适用范围：ARAM Mayhem Assistant 全栈项目（Android 客户端 + Spring Boot 后端）
 > 维护者：项目开发团队
-> 变更记录：v1.6.0 新增 BE-015~BE-021 日志规范（SLF4J+Logback+AOP+Timber）
+> 变更记录：v1.7.0 新增 M7 版本与公告模块规则（BE-022/023 公告权限 + 版本陷阱权限，AD-016/017 轮播生命周期 + 陷阱横幅）
 
 ---
 
@@ -241,6 +241,12 @@ private Response performRefresh(String refreshToken) throws IOException {
 
 **规则 AD-015**：OkHttpClient 超时配置统一为：连接 30s / 读取 30s / 写入 30s。
 
+**规则 AD-016**：公告轮播组件（BulletinCarouselView）必须在 `onAttachedToWindow()` 启动自动滚动、`onDetachedFromWindow()` 停止自动滚动，Fragment 的 `onDestroyView()` 中也必须调用 `stopAutoScroll()`，防止内存泄漏。
+
+理由：Handler.postDelayed 的 Runnable 持有 View 引用，若不在生命周期结束时移除，会导致 Activity/Fragment 无法被 GC 回收。
+
+**规则 AD-017**：版本陷阱横幅（VersionTrapBanner）仅在 `isVersionTrap == true` 时显示，默认 `GONE`。显示时必须包含版本信息和警告文案，使用红色背景突出警示效果。
+
 ---
 
 ## 第四章 后端开发规范
@@ -389,6 +395,14 @@ public class ServiceLoggingAspect {
 理由：Timber 自动获取调用位置，Release 构建可自动移除 Debug 日志，且支持自定义 Tree 扩展。
 
 **规则 BE-021**：Android Application 必须在 `onCreate()` 中初始化 Timber，Debug 模式使用 `Timber.DebugTree()`，Release 模式使用自定义 Tree（仅记录 WARN 及以上级别）。
+
+**规则 BE-022**：公告接口（`/api/bulletins/**`）必须配置为公开访问（`permitAll()`），无需认证即可查看公告列表和详情。
+
+理由：公告是面向所有用户的信息发布功能，未登录用户也应能查看版本更新和活动通知。
+
+**规则 BE-023**：版本陷阱标记接口（`/api/admin/**`）必须使用 `@PreAuthorize("hasRole('ADMIN')")` 限制管理员权限，普通用户无法标记/取消版本陷阱。
+
+理由：版本陷阱标记影响前端显示，仅管理员有权操作，防止恶意标记导致用户误导。
 
 ---
 
@@ -1122,6 +1136,10 @@ public class TokenStore {
 | TU-001 | 问题十二 | 批量替换遗漏 |
 | BE-014 | — | JWT Token Type 校验缺失 |
 | SYNC-001~009 | — | M1~M3 阶段伴随性任务遗漏教训 |
+| BE-022 | — | 公告接口公开访问权限配置 |
+| BE-023 | — | 版本陷阱标记需管理员权限 |
+| AD-016 | — | 公告轮播自动滚动生命周期管理 |
+| AD-017 | — | 版本陷阱横幅显示逻辑 |
 
 ---
 
@@ -1138,6 +1156,8 @@ public class TokenStore {
 | 1.5.0 | 2026-05-14 | M5 强化符文模块完成：后端 AugmentController + AugmentServiceImpl + AugmentDataInitializer（130个符文）；Android AugmentRepository + AugmentViewModel + AugmentListFragment（TabLayout+分页+离线检测）+ AugmentDetailBottomSheet | 项目开发团队 |
 | 1.5.1 | 2026-05-14 | M5 Task 11 完成：套装进度 API（synergy-progress）+ 智能推荐 API（recommend）；Android SynergyProgressSection + AugmentRecommendFragment | 项目开发团队 |
 | 1.5.2 | 2026-05-14 | 新增 git-commit-guide.md Git提交问题清单与规范；更新 CO-008 规则要求详细说明必须包含修改内容、涉及模块、解决问题、相关任务 | 项目开发团队 |
+| 1.6.0 | 2026-05-15 | 新增 BE-015~BE-021 日志规范（SLF4J+Logback+AOP+Timber） | 项目开发团队 |
+| 1.7.0 | 2026-05-15 | M7 版本与公告模块：新增 BE-022 公告接口公开访问权限、BE-023 版本陷阱标记管理员权限、AD-016 公告轮播自动滚动生命周期管理、AD-017 版本陷阱横幅显示逻辑 | 项目开发团队 |
 
 ---
 
