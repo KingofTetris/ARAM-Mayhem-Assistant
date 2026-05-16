@@ -2,8 +2,8 @@
 
 > 本文档按开发阶段分节记录所有关键操作、技术决策、问题与解决方案。
 > 最后更新：2026-05-16
-> 当前进度：M8 个人中心模块进行中 ⏳
-> 文档版本：v2.6（2026-05-16 M8 个人中心模块 + 数据库变更）
+> 当前进度：M8 个人中心模块已完成 ✅，准备进入 M9 数据管线
+> 文档版本：v2.7（2026-05-16 M8 个人中心模块完成 + 退出登录修复 + 滑动删除 + AD-018注释修复）
 
 ---
 
@@ -18,7 +18,7 @@
 | M5 | 强化符文模块 | ✅ 完成 | 100% | 依赖 M4 |
 | M6 | 社区模块 | ✅ 完成 | 100% | 社区浏览 + 玩法发布 + 投票 + 日志系统 |
 | M7 | 版本与公告 | ✅ 完成 | 100% | 公告列表+轮播+版本陷阱+强度说明 |
-| M8 | 个人中心 | ⏳ 进行中 | 60% | ProfileFragment + SettingsFragment + MyStrategiesFragment + 数据库v4 |
+| M8 | 个人中心 | ✅ 完成 | 100% | ProfileFragment + SettingsFragment + MyStrategiesFragment + 退出登录 + 滑动删除 + 数据库v4 |
 
 ---
 
@@ -1041,6 +1041,26 @@ HeroDetailUiModel.recommendedAugmentIds
 10. 修改 `NetworkModule`：注册 ProfileApi
 11. 修改 `navigation_graph.xml`：新增 MyStrategiesFragment + SettingsFragment 目标和导航动作
 
+**具体代码改动**：
+
+| 层级 | 文件 | 变更类型 | 变更内容 |
+|------|------|----------|----------|
+| API | `ProfileApi.java` | 新增 | Retrofit 接口：`getUserProfile()` → `Call<Result<UserProfileResponse>>`，`updateProfile(@Body UpdateProfileRequest)` → `Call<Result<UserProfileResponse>>` |
+| Repository | `ProfileRepository.java` | 新增 | `getUserProfile()` 返回 `LiveData<UserProfileResponse>`，`updateProfile(request)` 返回 `LiveData<UserProfileResponse>`，内部调用 ProfileApi + observeForever 转换 |
+| ViewModel | `ProfileViewModel.java` | 新增 | 字段：`profileRepository` / `tokenStore` / `authApi` / 6 个 MutableLiveData（userProfile/loading/error/updateSuccess/logoutEvent/loginSuccess）；方法：`loadUserProfile()` / `updateProfile()` / `logout()` / `login()` / `isLoggedIn()` + 6 个 getter |
+| ViewModel | `MyStrategiesViewModel.java` | 新增 | 字段：`communityApi` / 4 个 MutableLiveData（myStrategies/loading/error/deleteSuccess）；方法：`loadMyStrategies()` / `deleteStrategy(id, position)` + 4 个 getter |
+| Fragment | `ProfileFragment.java` | 新增 | `EXTRA_LOGGED_OUT` 常量；方法：`setupClickListeners()` / `observeViewModel()` / `bindUserProfile()` / `showNotLoggedInState()` / `showLoginDialog()` / `showLogoutConfirmDialog()` / `navigateToLogin()` |
+| Fragment | `SettingsFragment.java` | 新增 | 显示模式 SwitchCompat + 通知 SwitchCompat + 版本信息 TextView |
+| Fragment | `MyStrategiesFragment.java` | 新增 | 方法：`setupToolbar()` / `setupRecyclerView()` / `observeViewModel()` / `showDeleteConfirmDialog()` |
+| Adapter | `MyStrategiesAdapter.java` | 新增 | `OnDeleteClickListener` 接口；方法：`setStrategies()` / `removeItem()` / `setOnDeleteClickListener()`；ViewHolder：textTitle/textHero/textScore/imageDelete |
+| DI | `NetworkModule.java` | 修改 | 新增 `@Provides ProfileApi provideProfileApi(Retrofit retrofit)` |
+| Navigation | `navigation_graph.xml` | 修改 | 新增 `navigation_my_strategies` / `navigation_settings` 目标 + 从 `navigation_profile` 到两者的 action |
+| Layout | `fragment_profile.xml` | 新增 | CircleImageView 头像 + 昵称/邮箱 TextView + 统计 CardView（投稿数/收藏数）+ 菜单项（我的投稿/设置）+ 退出按钮 |
+| Layout | `fragment_settings.xml` | 新增 | Toolbar + SwitchCompat 显示模式 + SwitchCompat 通知开关 + 版本信息 |
+| Layout | `fragment_my_strategies.xml` | 新增 | Toolbar + RecyclerView + 空状态 TextView + ProgressBar |
+| Layout | `item_my_strategy.xml` | 新增 | MaterialCardView + 标题/英雄名/评分 TextView + 删除 ImageView |
+| Strings | `strings.xml` | 修改 | 新增 profile_nickname_default / profile_email_default / profile_logout / profile_logout_confirm / profile_logout_ok / profile_logout_cancel / my_strategies_empty / my_strategies_delete_confirm / my_strategies_delete_ok / profile_my_strategies / profile_settings |
+
 ### 8.2.4 静态分析工具配置
 
 **实施内容**：
@@ -1051,9 +1071,141 @@ HeroDetailUiModel.recommendedAugmentIds
 
 ## 8.3 技术问题与解决方案
 
-暂无重大问题。
+### 8.3.1 退出登录跳转失败（M8-01）
+
+**问题**：点击退出登录后，`navigateToLogin()` 使用隐式 Intent `ACTION_LOGIN` 跳转 LoginActivity，但项目中不存在 LoginActivity，导致退出登录无任何响应（静默失败）。
+
+**根因**：项目采用单 Activity 架构（MainActivity 为唯一入口），登录功能通过 Fragment 内的对话框实现，而非独立 Activity。
+
+**解决方案**：
+1. 修改 `ProfileFragment.navigateToLogin()`：使用 `getLaunchIntentForPackage()` + `FLAG_ACTIVITY_CLEAR_TASK | FLAG_ACTIVITY_NEW_TASK` 重启 MainActivity
+2. 新增 `EXTRA_LOGGED_OUT` Intent 标志，MainActivity 检测后自动切换到个人中心 Tab
+3. 新增 `showLoginDialog()`：Material Design 对话框，包含邮箱/密码输入框 + 空字段校验
+4. ProfileViewModel 新增 `login()` 方法和 `loginSuccess` LiveData
+5. 新增 `dialog_login.xml` 布局文件
+
+**具体代码改动**：
+
+| 文件 | 变更类型 | 变更内容 |
+|------|----------|----------|
+| `ProfileFragment.java` | 修改 | 新增 `public static final String EXTRA_LOGGED_OUT = "extra_logged_out"`；`navigateToLogin()` 重写为：`getPackageManager().getLaunchIntentForPackage()` + `FLAG_ACTIVITY_NEW_TASK \| FLAG_ACTIVITY_CLEAR_TASK` + `putExtra(EXTRA_LOGGED_OUT, true)` + `startActivity(intent)` + `finish()` |
+| `ProfileFragment.java` | 修改 | 新增 `showLoginDialog()` 方法：inflate `dialog_login.xml`，获取 editEmail/editPassword/textError 引用，空字段校验后调用 `viewModel.login(email, password)` |
+| `ProfileFragment.java` | 修改 | `setupClickListeners()` 中未登录时点击用户信息区域和"我的投稿"菜单项调用 `showLoginDialog()` |
+| `ProfileFragment.java` | 修改 | `observeViewModel()` 新增监听 `loginSuccess`：登录成功后调用 `viewModel.loadUserProfile()` 刷新资料 |
+| `ProfileViewModel.java` | 修改 | 新增 `private final AuthApi authApi` 字段 + `@Inject` 构造函数参数；新增 `MutableLiveData<Boolean> loginSuccess`；新增 `login(String email, String password)` 方法：调用 `authApi.login()` 异步请求，成功后 `tokenStore.saveTokens()` + `loginSuccess.setValue(true)` |
+| `MainActivity.java` | 修改 | `onCreate()` 末尾新增：`if (getIntent().getBooleanExtra(ProfileFragment.EXTRA_LOGGED_OUT, false)) { bottomNav.setSelectedItemId(R.id.navigation_profile); }` |
+| `dialog_login.xml` | 新增 | LinearLayout 容器：TextInputLayout+TextInputEditText（邮箱，inputType=textEmailAddress）+ TextInputLayout+TextInputEditText（密码，inputType=textPassword，endIconMode=password_toggle）+ TextView（错误提示，textColor=@color/error，visibility=gone） |
+| `strings.xml` | 修改 | 新增 login_title / login_cancel / login_submit / login_email_hint / login_password_hint / login_empty_fields |
+
+**退出登录完整流程**：
+
+```
+用户点击"退出登录"
+  → showLogoutConfirmDialog() 弹出确认对话框
+  → 用户确认 → viewModel.logout()
+  → TokenStore.clear() 清除 JWT Token
+  → logoutEvent.setValue(true)
+  → navigateToLogin()
+  → getLaunchIntentForPackage() + FLAG_ACTIVITY_CLEAR_TASK | FLAG_ACTIVITY_NEW_TASK
+  → putExtra(EXTRA_LOGGED_OUT, true)
+  → startActivity(intent) + finish()
+  → MainActivity.onCreate() 检测 EXTRA_LOGGED_OUT
+  → bottomNav.setSelectedItemId(R.id.navigation_profile)
+  → ProfileFragment onViewCreated()
+  → viewModel.isLoggedIn() == false → showNotLoggedInState()
+```
+
+**登录流程**：
+
+```
+用户点击用户信息区域或"我的投稿"（未登录状态）
+  → showLoginDialog() 弹出登录对话框
+  → 用户输入邮箱+密码 → 空字段校验
+  → viewModel.login(email, password)
+  → authApi.login(LoginRequest).enqueue()
+  → 成功：tokenStore.saveTokens(accessToken, refreshToken, expiresIn*1000)
+  → loginSuccess.setValue(true)
+  → ProfileFragment 监听 loginSuccess → viewModel.loadUserProfile()
+  → 失败：error.setValue("邮箱或密码错误") 或 "网络错误"
+```
+
+**关键决策**：
+| 编号 | 决策 | 理由 |
+|------|------|------|
+| 62 | 退出登录后重启 MainActivity 而非跳转 LoginActivity | 单 Activity 架构，无独立登录页 |
+| 63 | 使用 EXTRA_LOGGED_OUT 标志自动切换 Tab | 退出登录后用户应停留在个人中心页重新登录 |
+
+### 8.3.2 SpotBugs Gradle 配置错误
+
+**问题**：`effort` 和 `reportLevel` 属性使用字符串值而非枚举类型，导致构建失败。
+
+**解决方案**：改为 `Effort.valueOf('DEFAULT')` 和 `Confidence.valueOf('MEDIUM')` 枚举引用。
+
+### 8.3.3 HeroRepository 构造函数参数缺失
+
+**问题**：`HeroRepository.convertEntityToDetailUiModel()` 缺少 `versionTrap` 布尔参数，编译失败。
+
+**解决方案**：补充 `false` 作为默认值。
 
 ## 8.4 阶段成果与经验教训
+
+### 8.4.1 M8 后期新增功能
+
+**退出登录修复**：
+- ProfileFragment：`navigateToLogin()` 改为重启 MainActivity + 登录对话框
+- ProfileViewModel：新增 `login()` + `AuthApi` 依赖注入 + `loginSuccess` LiveData
+- MainActivity：检测 `EXTRA_LOGGED_OUT` 标志，自动切换到个人中心 Tab
+- 新增 `dialog_login.xml` 登录对话框布局
+
+**滑动删除功能（M8-02）**：
+- `item_my_strategy.xml`：重构为 FrameLayout 结构（底层红色删除背景 + 前景 MaterialCardView）
+- `MyStrategiesAdapter`：ViewHolder 新增 `cardForeground` 引用，新增 `getItem()` 方法，ViewHolder 改为 public
+- `MyStrategiesFragment`：新增 `setupSwipeToDelete()` 方法，使用 `ItemTouchHelper.SimpleCallback` 实现左滑删除
+- 交互流程：左滑露出红色背景 → 松手弹出确认对话框 → 确认删除 / 取消回弹
+
+**滑动删除具体代码改动**：
+
+| 文件 | 变更类型 | 变更内容 |
+|------|----------|----------|
+| `item_my_strategy.xml` | 重构 | 外层从 MaterialCardView 改为 FrameLayout；底层新增 `layout_delete_background`（LinearLayout，background=@color/error，gravity=end\|center_vertical，含 ImageView 删除图标 + TextView "删除"文字）；原 MaterialCardView 包裹为前景层，新增 `android:id="@+id/card_foreground"` |
+| `MyStrategiesAdapter.java` | 修改 | ViewHolder 从 `static class` 改为 `public static class`；新增 `public MaterialCardView cardForeground` 字段（`itemView.findViewById(R.id.card_foreground)`）；新增 `getItem(int position)` 方法（越界返回 null）；构造函数从 `ViewHolder` 改为 `public ViewHolder` |
+| `MyStrategiesFragment.java` | 修改 | 新增 `setupSwipeToDelete()` 方法：创建 `ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START)`，实现 `onMove()` 返回 false、`onSwiped()` 调用 `showSwipeDeleteConfirmDialog()`、`onChildDraw()` 仅移动 `cardForeground`（`getDefaultUIUtil().onDraw()`）、`clearView()` 恢复 `cardForeground`（`getDefaultUIUtil().clearView()`）、`getSwipeThreshold()` 返回 0.5f；新增 `showSwipeDeleteConfirmDialog()` 方法：取消时 `adapter.notifyItemChanged(position)` 回弹 |
+
+**滑动删除交互流程**：
+
+```
+用户左滑攻略卡片
+  → ItemTouchHelper.onChildDraw() 仅移动 cardForeground
+  → 底层 layout_delete_background（红色背景 + 删除图标）逐渐露出
+  → 滑动距离超过 50% 阈值 → onSwiped() 触发
+  → showSwipeDeleteConfirmDialog() 弹出确认对话框
+  → 用户确认 → viewModel.deleteStrategy(id, position) → 删除成功后刷新列表
+  → 用户取消 → adapter.notifyItemChanged(position) → 卡片回弹到原位
+```
+
+**AD-018 注释修复**：
+- ProfileFragment.java：补充类级 Javadoc + 字段注释 + 方法 Javadoc + 行内注释
+- ProfileViewModel.java：补充字段注释 + 构造函数 @param + login() Javadoc + getter @return + 行内注释
+- MainActivity.java：补充类级 Javadoc + 字段注释 + onHeroSelected Javadoc + 行内注释
+
+**AD-018 注释修复具体改动**：
+
+| 文件 | 注释层级 | 补充内容 |
+|------|----------|----------|
+| `ProfileFragment.java` | 类级 | `/** 个人中心页（个人中心模块）— 功能/导航/关联组件 @see */` |
+| `ProfileFragment.java` | 字段级 | `EXTRA_LOGGED_OUT`：`/** 退出登录后重启 MainActivity 时传递的 Intent 标志键 */`；`binding`：`/** 视图绑定对象 */`；`viewModel`：`/** 个人中心 ViewModel */` |
+| `ProfileFragment.java` | 方法级 | `setupClickListeners()`：`/** 设置各 UI 元素的点击监听器 — 逻辑说明 */`；`observeViewModel()`：`/** 观察 ViewModel 的 LiveData 数据变化并更新 UI — 监听项列表 */`；`bindUserProfile()`：`/** 将用户资料数据绑定到 UI 控件 @param profile */`；`showNotLoggedInState()`：`/** 显示未登录状态 — 逻辑说明 */`；`showLoginDialog()`：`/** 显示登录对话框 — 逻辑说明 */`；`showLogoutConfirmDialog()`：`/** 显示退出登录确认对话框 */`；`navigateToLogin()`：`/** 退出登录后重启应用 — 逻辑说明 */` |
+| `ProfileFragment.java` | 行内 | 登录状态判断、空字段校验、头像 Glide 加载、退出按钮显隐等关键逻辑处 |
+| `ProfileViewModel.java` | 类级 | 更新功能概述（加入登录）、数据流描述（`ProfileRepository/AuthApi → LiveData → ProfileFragment`）、新增 `@see AuthApi` |
+| `ProfileViewModel.java` | 字段级 | 全部 9 个字段加 `/** */`：`profileRepository`（用户资料仓库）、`tokenStore`（令牌存储）、`authApi`（认证 API）、`userProfile`（用户资料数据）、`loading`（加载状态）、`error`（错误信息）、`updateSuccess`（资料更新成功标志）、`logoutEvent`（退出登录事件）、`loginSuccess`（登录成功事件） |
+| `ProfileViewModel.java` | 方法级 | 构造函数加 `@param` 三个参数；`login()` 加完整 Javadoc（作用/实现/`@param email`/`@param password`）；6 个 getter 加 `@return`；`isLoggedIn()` 加 `@return` |
+| `ProfileViewModel.java` | 行内 | `loadUserProfile()` 防止重复加载；`login()` 中 expiresIn 秒→毫秒转换、登录失败/网络错误分支 |
+| `MainActivity.java` | 类级 | 更新功能概述（加入退出登录 Tab 切换）、`@see ProfileFragment` |
+| `MainActivity.java` | 字段级 | `binding`：`/** 视图绑定对象 */` |
+| `MainActivity.java` | 方法级 | `onHeroSelected()`：`/** 英雄选中回调 — 作用说明 @param heroId */` |
+| `MainActivity.java` | 行内 | 退出登录后 Tab 切换逻辑 |
+
+### 8.4.2 交付物汇总
 
 **交付物**：
 - 后端：UserController + UserServiceImpl + UserProfileVO + UpdateProfileRequest
@@ -1061,6 +1213,9 @@ HeroDetailUiModel.recommendedAugmentIds
 - 后端：UserServiceTest（7 用例）+ UserControllerTest（7 用例）
 - Android：ProfileApi + ProfileRepository + ProfileViewModel + MyStrategiesViewModel
 - Android：ProfileFragment + SettingsFragment + MyStrategiesFragment + MyStrategiesAdapter
+- Android：退出登录修复（重启 MainActivity + 登录对话框 + EXTRA_LOGGED_OUT 标志）
+- Android：MyStrategiesFragment 滑动删除（ItemTouchHelper + FrameLayout 双层布局）
+- Android：AD-018 四层注释修复（ProfileFragment + ProfileViewModel + MainActivity）
 - Android：数据库 v3→v4 + HeroEntity.recommendedAugmentIds + SkillListConverter 扩展
 - Android：HeroDetailFragment 推荐强化符文展示
 - Android：Checkstyle + SpotBugs 静态分析配置
@@ -1071,3 +1226,211 @@ HeroDetailUiModel.recommendedAugmentIds
 2. ✅ HeroDetailUiModel 构造函数参数变更需同步更新所有调用点（Repository 两个转换方法 + 缓存写入）
 3. ✅ MyStrategiesViewModel 独立于 ProfileViewModel，避免单个 ViewModel 职责过重
 4. ✅ Checkstyle/SpotBugs 使用 ignoreFailures=true，开发阶段不阻塞构建
+5. ✅ 单 Activity 架构下退出登录应重启 MainActivity 而非跳转不存在的 LoginActivity
+6. ✅ ItemTouchHelper 滑动删除需使用 FrameLayout 双层结构（背景层 + 前景层），onChildDraw 仅移动前景
+7. ✅ ViewHolder 和其字段需 public 修饰，否则外部 Fragment 无法访问（ItemTouchHelper 回调中需转型）
+8. ✅ AD-018 四层注释规范必须严格执行：类级 Javadoc、字段注释、方法 Javadoc、行内注释缺一不可
+
+---
+
+## 8.5 M8 阶段完成报告
+
+> 报告日期：2026-05-16
+> 阶段状态：✅ 全部完成
+> 下一阶段：M9 数据管线
+
+### 8.5.1 阶段目标达成情况
+
+| 任务编号 | 任务描述 | 状态 | 交付物 |
+|----------|----------|------|--------|
+| M8-01 | 退出登录跳转修复 | ✅ 完成 | ProfileFragment.navigateToLogin() 重写 + 登录对话框 + EXTRA_LOGGED_OUT 标志 |
+| M8-02 | 我的攻略滑动删除 | ✅ 完成 | ItemTouchHelper + FrameLayout 双层布局 + 确认/回弹交互 |
+| M8-03 | 数据库 v3→v4 | ✅ 完成 | HeroEntity.recommendedAugmentIds + SkillListConverter 扩展 |
+| M8-04 | 任务追踪更新 | ✅ 完成 | tasks.md Task 15 全部子项标记完成 |
+| M8-05 | 开发日志记录 | ✅ 完成 | dev-log.md M8 全阶段记录 + 本完成报告 |
+| — | 后端个人中心 API | ✅ 完成 | UserController + UserService + UserProfileVO + UpdateProfileRequest |
+| — | 后端攻略删除 API | ✅ 完成 | StrategyController DELETE 端点 + 事务性删除 |
+| — | Android 个人中心 UI | ✅ 完成 | ProfileFragment + SettingsFragment + MyStrategiesFragment |
+| — | 静态分析工具 | ✅ 完成 | Checkstyle + SpotBugs 配置 |
+| — | AD-018 注释修复 | ✅ 完成 | ProfileFragment + ProfileViewModel + MainActivity 四层注释 |
+| — | 编译/启动修复 | ✅ 完成 | UserServiceTest + application.yml + 数据库表结构同步 |
+
+### 8.5.2 问题与解决方案汇总
+
+M8 阶段共遇到 **10 个技术问题**，按发现阶段分为三类：
+
+#### A. 开发阶段问题（5 个）
+
+| 编号 | 问题 | 严重度 | 根因 | 解决方案 | 影响文件 |
+|------|------|--------|------|----------|----------|
+| M8-P01 | 退出登录跳转静默失败 | 🔴 高 | `navigateToLogin()` 使用 `ACTION_LOGIN` 隐式 Intent 跳转不存在的 LoginActivity | 重写为 `getLaunchIntentForPackage()` + `FLAG_ACTIVITY_CLEAR_TASK \| FLAG_ACTIVITY_NEW_TASK` 重启 MainActivity | ProfileFragment.java |
+| M8-P02 | ItemTouchHelper 编译错误 | 🔴 高 | `SimpleCallback` 抽象方法 `onMove()` 未实现 | 补充 `onMove()` override 返回 false | MyStrategiesFragment.java |
+| M8-P03 | ViewHolder 不可访问 | 🟠 中 | `MyStrategiesAdapter.ViewHolder` 为包私有，Fragment 无法转型访问 `cardForeground` | ViewHolder 改为 `public static class`，`cardForeground` 改为 `public` | MyStrategiesAdapter.java |
+| M8-P04 | SpotBugs Gradle 配置错误 | 🟡 低 | `effort`/`reportLevel` 使用字符串值而非枚举 | 改为 `Effort.valueOf('DEFAULT')` 和 `Confidence.valueOf('MEDIUM')` | app/build.gradle |
+| M8-P05 | HeroRepository 构造函数参数缺失 | 🟠 中 | `convertEntityToDetailUiModel()` 缺少 `versionTrap` 参数 | 补充 `false` 作为默认值 | HeroRepository.java |
+
+#### B. 编译/启动阶段问题（3 个）
+
+| 编号 | 问题 | 严重度 | 根因 | 解决方案 | 影响文件 |
+|------|------|--------|------|----------|----------|
+| M8-P06 | UserServiceTest 编译失败 | 🔴 高 | `verify(userMapper, never()).updateById(any())` 调用不明确，MyBatis-Plus BaseMapper 有 `updateById(T)` 和 `updateById(Collection<T>)` 两个重载 | 改为 `verify(userMapper, never()).updateById(any(User.class))` | UserServiceTest.java |
+| M8-P07 | MySQL 连接字符编码错误 | 🔴 高 | `characterEncoding=utf8mb4` 不被 MySQL Connector/J 8.3.0 识别，Java 不存在 `utf8mb4` 字符编码名 | 改为 `characterEncoding=UTF-8`（MySQL 会自动使用 utf8mb4） | application.yml |
+| M8-P08 | 数据库表结构与实体类不匹配 | 🔴 高 | tb_augment 缺少 synergy_set2/synergy_set3/icon_url/win_rate/pick_rate/avg_placement/tier/is_version_trap/version_trap_since 共 9 列；tb_hero 缺少 recommended_augment_ids/is_version_trap/version_trap_since 共 3 列；tb_augment 有冗余 image_url 列 | ALTER TABLE 补充缺失列、删除冗余列 | MySQL 数据库 |
+
+#### C. 数据精度问题（2 个）
+
+| 编号 | 问题 | 严重度 | 根因 | 解决方案 | 影响文件 |
+|------|------|--------|------|----------|----------|
+| M8-P09 | Augment win_rate 数据溢出 | 🔴 高 | 数据库列 `DECIMAL(5,4)` 最大值 9.9999，但 AugmentDataInitializer 插入百分比值（如 58.2） | 修改列定义为 `DECIMAL(5,2)` 以匹配百分比格式 | MySQL tb_augment |
+| M8-P10 | Hero win_rate/pick_rate 精度不一致 | 🟡 低 | tb_hero 的 win_rate/pick_rate 为 `DECIMAL(5,2)`（百分比），而 tb_augment 原为 `DECIMAL(5,4)`（0~1 比率） | 统一为 `DECIMAL(5,2)` 百分比格式 | MySQL tb_augment |
+
+### 8.5.3 代码改动点统计
+
+#### 后端改动（Java + 配置）
+
+| 文件 | 变更类型 | 改动行数(估) | 关键改动 |
+|------|----------|-------------|----------|
+| `UserController.java` | 新增 | ~80 | GET /api/users/me/profile + PATCH /api/users/me |
+| `UserService.java` | 新增 | ~15 | 接口定义：getUserProfile / updateProfile |
+| `UserServiceImpl.java` | 新增 | ~120 | 用户资料查询（含攻略数统计）+ 部分更新逻辑 |
+| `UserProfileVO.java` | 新增 | ~40 | Builder 模式 VO，9 个字段 |
+| `UpdateProfileRequest.java` | 新增 | ~35 | @Size 校验昵称，4 个可更新字段 |
+| `StrategyController.java` | 修改 | +15 | 新增 DELETE /api/strategies/{id} |
+| `StrategyServiceImpl.java` | 修改 | +20 | 新增 deleteStrategy 事务性删除 |
+| `Hero.java` | 修改 | +10 | 新增 recommendedAugmentIds/isVersionTrap/versionTrapSince |
+| `HeroDetailVO.java` | 修改 | +5 | 新增 recommendedAugmentIds |
+| `HeroServiceImpl.java` | 修改 | +5 | convertToDetailVO 新增字段映射 |
+| `Augment.java` | 已存在 | — | synergySet2/synergySet3/icon_url/win_rate/pick_rate/avg_placement/tier/isVersionTrap/versionTrapSince |
+| `UserServiceTest.java` | 新增 | ~230 | 7 个测试用例 + 修复 updateById(any()) → any(User.class) |
+| `UserControllerTest.java` | 新增 | ~200 | 7 个测试用例 |
+| `AugmentDataInitializer.java` | 已存在 | — | 初始化数据使用百分比 winRate/pickRate |
+| `application.yml` | 修改 | 1 | characterEncoding=utf8mb4 → UTF-8 |
+| **后端合计** | — | **~775** | — |
+
+#### Android 改动（Java + XML）
+
+| 文件 | 变更类型 | 改动行数(估) | 关键改动 |
+|------|----------|-------------|----------|
+| `ProfileApi.java` | 新增 | ~15 | Retrofit 接口：getUserProfile / updateProfile |
+| `ProfileRepository.java` | 新增 | ~60 | 用户资料查询 + 更新 |
+| `ProfileViewModel.java` | 新增 | ~130 | 9 个字段 + loadUserProfile/updateProfile/logout/login/isLoggedIn + 6 个 getter |
+| `MyStrategiesViewModel.java` | 新增 | ~70 | 4 个字段 + loadMyStrategies/deleteStrategy + 4 个 getter |
+| `ProfileFragment.java` | 新增 | ~250 | EXTRA_LOGGED_OUT + 7 个方法（含登录对话框 + 退出登录重启） |
+| `SettingsFragment.java` | 新增 | ~60 | 显示模式/通知开关 + 版本信息 |
+| `MyStrategiesFragment.java` | 新增 | ~200 | setupSwipeToDelete + showSwipeDeleteConfirmDialog + ItemTouchHelper 回调 |
+| `MyStrategiesAdapter.java` | 新增 | ~140 | OnDeleteClickListener + getItem + removeItem + public ViewHolder |
+| `HeroDetailFragment.java` | 修改 | +30 | updateRecommendedAugments() |
+| `HeroRepository.java` | 修改 | +15 | 三处补充 recommendedAugmentIds 映射 + versionTrap 默认值 |
+| `HeroDetailUiModel.java` | 修改 | +5 | 新增 recommendedAugmentIds |
+| `HeroDetailResponse.java` | 修改 | +5 | 新增 recommendedAugmentIds |
+| `HeroEntity.java` | 修改 | +5 | 新增 recommendedAugmentIds |
+| `SkillListConverter.java` | 修改 | +15 | 新增 fromLongList/toLongList |
+| `AppDatabase.java` | 修改 | 1 | 版本号 3→4 |
+| `NetworkModule.java` | 修改 | +5 | 注册 ProfileApi |
+| `MainActivity.java` | 修改 | +5 | EXTRA_LOGGED_OUT 检测 + Tab 切换 |
+| `navigation_graph.xml` | 修改 | +15 | 新增 2 个目标 + 2 个 action |
+| `fragment_profile.xml` | 新增 | ~80 | CircleImageView + 统计 CardView + 菜单 + 退出按钮 |
+| `fragment_settings.xml` | 新增 | ~50 | Toolbar + 2 个 SwitchCompat + 版本 |
+| `fragment_my_strategies.xml` | 新增 | ~40 | Toolbar + RecyclerView + 空状态 + ProgressBar |
+| `item_my_strategy.xml` | 新增→重构 | ~60 | FrameLayout 双层（红色删除背景 + 前景卡片） |
+| `dialog_login.xml` | 新增 | ~55 | 邮箱/密码输入框 + 错误提示 |
+| `fragment_hero_detail.xml` | 修改 | +20 | CardView + ChipGroup 推荐强化符文 |
+| `strings.xml` | 修改 | +15 | 新增 11 个字符串资源 |
+| `Checkstyle/SpotBugs 配置` | 新增 | ~200 | checkstyle.xml + exclude.xml + build.gradle |
+| **Android 合计** | — | **~1,540** | — |
+
+#### 数据库改动（MySQL DDL）
+
+| 操作 | 表 | 内容 |
+|------|-----|------|
+| ALTER ADD | tb_augment | synergy_set2, synergy_set3, icon_url, win_rate, pick_rate, avg_placement, tier, is_version_trap, version_trap_since（9 列） |
+| ALTER DROP | tb_augment | image_url（冗余列，被 icon_url 替代） |
+| ALTER MODIFY | tb_augment | win_rate DECIMAL(5,4)→DECIMAL(5,2), pick_rate DECIMAL(5,4)→DECIMAL(5,2) |
+| ALTER ADD | tb_hero | recommended_augment_ids, is_version_trap, version_trap_since（3 列） |
+
+#### 改动总量
+
+| 维度 | 数量 |
+|------|------|
+| 后端新增/修改文件 | 14 个 |
+| Android 新增/修改文件 | 24 个 |
+| 数据库 ALTER TABLE | 4 次 |
+| 新增代码行数（估） | ~2,315 行 |
+| 修复问题数 | 10 个 |
+| 新增测试用例 | 14 个 |
+
+### 8.5.4 技术决策记录
+
+| 编号 | 决策 | 理由 | 影响范围 |
+|------|------|------|----------|
+| 58 | recommendedAugmentIds 使用 List<Long> 而非 List<Augment> | 符文详情已有 AugmentApi 单独查询，仅存 ID 避免数据冗余 | Hero 实体 + HeroDetailVO + HeroDetailUiModel + HeroEntity |
+| 59 | Room TypeConverter 新增 List<Long> 转换 | Room 不原生支持 List<Long>，需 Gson 序列化为 JSON String | SkillListConverter |
+| 60 | 数据库 fallbackToDestructiveMigration | 开发阶段数据可丢失，避免手写 Migration 维护成本 | AppDatabase |
+| 61 | Chip 展示"符文 #ID"而非符文名称 | 符文名称需额外 API 查询，当前阶段 ID 展示已满足基本需求 | HeroDetailFragment |
+| 62 | 退出登录后重启 MainActivity 而非跳转 LoginActivity | 单 Activity 架构，无独立登录页 | ProfileFragment + MainActivity |
+| 63 | 使用 EXTRA_LOGGED_OUT 标志自动切换 Tab | 退出登录后用户应停留在个人中心页重新登录 | ProfileFragment + MainActivity |
+| 64 | ItemTouchHelper + FrameLayout 双层布局实现滑动删除 | onChildDraw 仅移动前景层，底层红色删除背景自然露出 | item_my_strategy.xml + MyStrategiesAdapter + MyStrategiesFragment |
+| 65 | 滑动删除阈值 0.5f | 50% 滑动距离触发 onSwiped，平衡误触和操作成本 | MyStrategiesFragment.setupSwipeToDelete() |
+| 66 | characterEncoding=UTF-8 替代 utf8mb4 | MySQL Connector/J 8.x 使用 Java 字符编码名，MySQL 服务端自动映射为 utf8mb4 | application.yml |
+| 67 | win_rate/pick_rate 统一为 DECIMAL(5,2) 百分比格式 | 与 AugmentDataInitializer 实际数据格式一致，避免溢出 | tb_augment + tb_hero |
+
+### 8.5.5 关键技术要点总结
+
+#### 1. 单 Activity 架构下的退出登录
+
+**问题本质**：单 Activity 架构中，Fragment 无法直接跳转到"登录页"，因为登录功能以对话框形式嵌入 Fragment 内。
+
+**解决方案模式**：
+```
+Fragment → ViewModel.logout() → TokenStore.clear()
+         → navigateToLogin() → restart MainActivity with EXTRA flag
+         → MainActivity.onCreate() → detect flag → switch to Profile Tab
+         → ProfileFragment → isLoggedIn() == false → show login dialog
+```
+
+**适用场景**：任何需要在单 Activity 架构中"重置用户状态"的场景。
+
+#### 2. ItemTouchHelper 滑动删除实现模式
+
+**核心结构**：
+```
+FrameLayout
+  ├── layout_delete_background（红色背景 + 删除图标，固定不动）
+  └── card_foreground（MaterialCardView，滑动时移动）
+```
+
+**关键回调**：
+- `onChildDraw()`：仅移动前景层，使用 `getDefaultUIUtil().onDraw()` 传入 foregroundView
+- `clearView()`：恢复前景层位置，使用 `getDefaultUIUtil().clearView()`
+- `onSwiped()`：弹出确认对话框，取消时 `notifyItemChanged()` 回弹
+- `getSwipeThreshold()`：0.5f 阈值防止误触
+
+**注意事项**：
+- ViewHolder 必须为 `public static class`，否则外部 Fragment 无法转型
+- 前景视图引用必须为 `public` 字段，供 ItemTouchHelper 回调访问
+- `onMove()` 必须实现（返回 false），否则编译失败
+
+#### 3. MyBatis-Plus BaseMapper 重载歧义
+
+**问题**：MyBatis-Plus 3.5.x 的 `BaseMapper` 新增了 `updateById(Collection<T>)` 重载，导致 Mockito 的 `any()` 匹配器无法确定调用哪个重载。
+
+**解决**：始终使用类型明确的匹配器（如 `any(User.class)`），避免 `any()` 无类型匹配。
+
+#### 4. MySQL Connector/J 字符编码配置
+
+**规则**：MySQL Connector/J 8.x 的 `characterEncoding` 参数使用 Java 字符编码名（如 `UTF-8`），而非 MySQL 字符集名（如 `utf8mb4`）。MySQL 服务端收到 `UTF-8` 后会自动使用 `utf8mb4` 字符集。
+
+#### 5. 数据库列精度与代码数据格式一致性
+
+**教训**：实体类注释描述"0~1 之间"，但初始化器实际使用百分比值（0~100），导致 `DECIMAL(5,4)` 溢出。**数据库列定义必须与实际数据格式一致**，不能仅依赖注释描述。
+
+### 8.5.6 遗留问题与后续建议
+
+| 编号 | 问题 | 优先级 | 建议处理阶段 |
+|------|------|--------|-------------|
+| L-01 | HeroDetailFragment 推荐强化符文仅显示 ID，未显示名称 | P2 | M9 数据管线阶段补充 AugmentApi 批量查询 |
+| L-02 | ProfileFragment 登录对话框未实现"注册"入口 | P2 | M9 或后续迭代补充注册对话框 |
+| L-03 | SettingsFragment 开关未实际持久化到后端 | P2 | M9 补充 ProfileApi.updateProfile 调用 |
+| L-04 | Checkstyle/SpotBugs 使用 ignoreFailures=true | P3 | 正式发布前改为 true，阻塞构建 |
+| L-05 | 数据库使用 fallbackToDestructiveMigration | P3 | 正式发布前需实现 Migration 策略 |
+| L-06 | Augment 实体注释 winRate "0~1 之间" 与实际百分比格式不一致 | P3 | 更新注释或统一数据格式 |

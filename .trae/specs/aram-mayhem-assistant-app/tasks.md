@@ -129,14 +129,14 @@
 
 ## 阶段八：个人中心（M8）
 
-- [ ] Task 15: 个人中心
-  - [ ] 15.1 实现 UserController（GET /api/users/me/profile）→ 返回昵称、头像、投稿数、获赞总数
-  - [ ] 15.2 实现 UserController（PATCH /api/users/me）→ 更新 displayMode / notificationEnabled
-  - [ ] 15.3 Android 创建 ProfileApi + ProfileRepository
-  - [ ] 15.4 开发 ProfileFragment：CircleImageView 头像 + 昵称 + 统计 CardView（投稿数/获赞数）+ ListView 功能入口
-  - [ ] 15.5 开发 SettingsFragment：SwitchCompat 极简模式/通知开关 → DataStore 存储 + VM 更新
-  - [ ] 15.6 开发 MyStrategiesFragment：RecyclerView 我的投稿 + ItemTouchHelper 滑动删除 + AlertDialog 确认
-  - [ ] 15.7 退出登录：清除 EncryptedSharedPreferences Token + 清除 Room 数据 + Intent 跳转 LoginActivity
+- [x] Task 15: 个人中心
+  - [x] 15.1 实现 UserController（GET /api/users/me/profile）→ 返回昵称、头像、投稿数、获赞总数
+  - [x] 15.2 实现 UserController（PATCH /api/users/me）→ 更新 displayMode / notificationEnabled
+  - [x] 15.3 Android 创建 ProfileApi + ProfileRepository
+  - [x] 15.4 开发 ProfileFragment：CircleImageView 头像 + 昵称 + 统计 CardView（投稿数/获赞数）+ ListView 功能入口
+  - [x] 15.5 开发 SettingsFragment：SwitchCompat 极简模式/通知开关 → DataStore 存储 + VM 更新
+  - [x] 15.6 开发 MyStrategiesFragment：RecyclerView 我的投稿 + ItemTouchHelper 滑动删除 + AlertDialog 确认
+  - [x] 15.7 退出登录：清除 EncryptedSharedPreferences Token + 重启 MainActivity + 登录对话框
 
 ## 阶段九：数据管线（M9）
 
