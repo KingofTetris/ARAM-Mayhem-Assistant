@@ -1,9 +1,9 @@
 # ARAM Mayhem Assistant 开发日志
 
 > 本文档按开发阶段分节记录所有关键操作、技术决策、问题与解决方案。
-> 最后更新：2026-05-16
-> 当前进度：M8 个人中心模块已完成 ✅，准备进入 M9 数据管线
-> 文档版本：v2.7（2026-05-16 M8 个人中心模块完成 + 退出登录修复 + 滑动删除 + AD-018注释修复）
+> 最后更新：2026-05-18
+> 当前进度：M8 个人中心模块已完成 ✅，M8 遗留修复已完成 ✅，M9 数据管线 进行中 🚧
+> 文档版本：v2.9（2026-05-18 M8 遗留修复完成报告 + 测试修复 + 日志埋点）
 
 ---
 
@@ -1434,3 +1434,212 @@ FrameLayout
 | L-04 | Checkstyle/SpotBugs 使用 ignoreFailures=true | P3 | 正式发布前改为 true，阻塞构建 |
 | L-05 | 数据库使用 fallbackToDestructiveMigration | P3 | 正式发布前需实现 Migration 策略 |
 | L-06 | Augment 实体注释 winRate "0~1 之间" 与实际百分比格式不一致 | P3 | 更新注释或统一数据格式 |
+
+### 8.5.7 M8 遗留修复完成报告
+
+> 报告日期：2026-05-18
+> 修复范围：L-01 / L-02 / L-03 / L-06 + 测试修复 + 日志埋点
+> 状态：✅ 全部完成并提交远程仓库
+
+#### 遗留修复任务完成情况
+
+| 编号 | 修复内容 | 状态 | 涉及仓库 | 关键改动 |
+|------|----------|------|----------|----------|
+| L-01 | 推荐符文显示名称替代 ID | ✅ 完成 | 后端 + Android | 后端新增 AugmentBriefVO + resolveAugmentBriefs()；Android 全链路 DTO/Entity/UiModel/Fragment 品质色 Chip |
+| L-02 | 新增用户注册功能 | ✅ 完成 | Android | ProfileFragment 注册对话框 + ProfileViewModel.register() + dialog_register.xml |
+| L-03 | 设置保存 Toast 反馈 + 日志 | ✅ 完成 | Android | SettingsFragment 保存成功/失败 Toast + Timber 日志埋点 |
+| L-06 | winRate/pickRate 注释修正 | ✅ 完成 | 后端 | Hero.java + Augment.java 注释从"0~1之间"改为"百分比格式" |
+
+#### 测试结果摘要
+
+| 测试套件 | 总数 | 通过 | 失败 | 错误 | 关键发现 |
+|----------|------|------|------|------|----------|
+| 后端 Service 层 | 78 | 78 | 0 | 0 | HeroServiceTest 23 个、AugmentServiceTest 24 个、AuthServiceTest 8 个全部通过 |
+| 后端 Controller 层 | 27 | 0 | 0 | 27 | @WebMvcTest Spring 上下文加载失败（Redis/DataSource Bean 缺失），非本次修改引起 |
+| 后端 Security 层 | 16 | 16 | 0 | 0 | JwtTokenProviderTest 全部通过 |
+| Android feature-hero | 16 | 16 | 0 | 0 | HeroListViewModelTest 重构为 mock HeroRepository 后全部通过 |
+| Android feature-bulletin | 13 | 13 | 0 | 0 | 补充 junit-jupiter/mockito 依赖后全部通过 |
+| Android feature-profile | — | — | — | — | 无单元测试（NO-SOURCE） |
+
+**关键发现**：
+1. 后端 Controller 层 27 个错误为 Spring 上下文加载问题，与本次修改无关，属于遗留技术债
+2. HeroListViewModelTest 因构造函数签名变更（HeroApi → HeroRepository）需全面重构，已修复
+3. feature-bulletin 模块缺少测试依赖（junit-jupiter/mockito），已补充
+
+#### 日志埋点清单
+
+| 埋点位置 | 日志标签 | 记录内容 | 日志级别 |
+|----------|----------|----------|----------|
+| ProfileFragment 登录→注册跳转 | Navigation: login_dialog -> register_dialog | timestamp | INFO |
+| ProfileFragment 注册→登录跳转 | Navigation: register_dialog -> login_dialog | timestamp | INFO |
+| ProfileViewModel.login() | AuthFlow: login_start/success/fail | email, timestamp | INFO/WARN/ERROR |
+| ProfileViewModel.register() | AuthFlow: register_start/success/fail | email, nickname, timestamp | INFO/WARN/ERROR |
+| SettingsFragment 开关切换 | Settings: display_mode_change / notification_change | value, timestamp | INFO |
+| SettingsFragment 保存结果 | Settings: save_success / save_fail | timestamp | INFO/WARN |
+| HeroDetailFragment 符文展示 | AugmentDisplay: load_by_name / load_by_id_fallback / no_augments | heroId, count, source, timestamp | INFO/WARN/DEBUG |
+
+#### 代码提交记录
+
+| 仓库 | 提交信息 | Commit ID |
+|------|----------|-----------|
+| 后端 | [backend] feat: L-01 推荐符文显示名称替代ID | 0b972f7 |
+| 后端 | [backend] fix: L-06 修正 winRate/pickRate 注释为百分比格式 | 4652fa0 |
+| Android | [feature-hero] feat: L-01 推荐符文显示名称替代ID | 5e514ca |
+| Android | [feature-profile] feat: L-02 新增用户注册功能 | 7c7bc91 |
+| Android | [feature-profile] fix: L-03 设置保存添加Toast反馈和日志埋点 | 219a06d |
+| Android | [core-common] fix: 修复单元测试编译错误和依赖缺失 | e623af5 |
+
+#### 已解决的问题
+
+| 编号 | 问题 | 解决方案 |
+|------|------|----------|
+| T-01 | HeroListViewModelTest 构造函数签名不匹配 | 重构为 mock HeroRepository，简化测试逻辑 |
+| T-02 | feature-bulletin 缺少 JUnit 5 / Mockito 测试依赖 | build.gradle 添加 testImplementation |
+| T-03 | feature-hero 缺少 Timber 依赖 | build.gradle 添加 implementation |
+| T-04 | HeroUiModel 构造函数参数顺序不匹配 | 测试中 createHeroUiModels() 补充 title 参数 |
+
+#### 仍存在的风险
+
+| 编号 | 风险 | 严重度 | 建议处理阶段 |
+|------|------|--------|-------------|
+| R-01 | 后端 Controller 层 27 个 @WebMvcTest 上下文加载失败 | 🟠 中 | M9 补充 MockBean 或改用 @SpringBootTest |
+| R-02 | feature-profile 无单元测试 | 🟡 低 | M9 补充 ProfileViewModel 单元测试 |
+| R-03 | L-04 Checkstyle/SpotBugs ignoreFailures=true | 🟡 低 | 正式发布前改为 false |
+| R-04 | L-05 fallbackToDestructiveMigration | 🟡 低 | 正式发布前实现 Migration |
+
+#### 下一阶段工作计划
+
+| 优先级 | 任务 | 描述 |
+|--------|------|------|
+| P0 | M9 Task 16.0 基础设施准备 | pom.xml + application.yml + Config 类 |
+| P0 | M9 Task 16.1 RiotDataDragonClient | 英雄基础数据采集 |
+| P1 | M9 Task 16.2 AramDataCollector | ARAM 胜率数据采集 |
+| P1 | M9 Task 16.3 DataAggregatorService | 数据聚合与清洗 |
+| P1 | M9 Task 16.4 MultiSourceValidator | 交叉验证 |
+| P2 | 后端 Controller 测试修复 | 补充 MockBean 配置 |
+| P2 | ProfileViewModel 单元测试 | 补充登录/注册/退出测试 |
+
+---
+
+# 第九阶段：数据管线 + 遗留修复（M9）
+
+> 开始日期：2026-05-16
+> 阶段状态：🚧 进行中（L-01/L-02/L-03/L-06 已完成）
+> 前置依赖：M1~M8 全部完成
+
+## 9.1 阶段目标与范围
+
+M9 阶段分为两大板块：
+
+1. **M8 遗留问题修复（Task 16-L）**：修复 M8 阶段遗留的 4 个功能不完整问题
+2. **数据管线核心（Task 16）**：实现多源数据采集、清洗、验证、同步、缓存预热全链路
+
+### 阶段目标
+
+| 目标 | 描述 | 验收标准 |
+|------|------|----------|
+| 遗留修复 | 修复 L-01/L-02/L-03/L-06 四个遗留问题 | 英雄详情推荐符文显示名称、登录对话框有注册入口、设置开关持久化、注释格式一致 |
+| 数据采集 | 实现 Riot Data Dragon + U.GG 双源数据采集 | 可成功拉取英雄基础信息和 ARAM 胜率数据 |
+| 数据清洗 | 多源数据合并、去重、范围校验 | 胜率数据在 0-100% 范围内，缺值填充默认值 |
+| 交叉验证 | 双源数据一致性校验 | 差值 >5% 标记 LOW 置信度 |
+| 定时同步 | 每 6 小时自动全量同步 | @Scheduled 正常触发，Redis 分布式锁防重复 |
+| 缓存预热 | 同步后自动预热 Redis | Top 50 英雄详情 + 符文列表缓存就绪 |
+
+## 9.2 任务执行计划
+
+### 第一周：遗留修复 + 基础设施（Task 16-L + 16.0）
+
+| 日期 | 任务 | 涉及仓库 | 产出 |
+|------|------|----------|------|
+| Day 1 | L-01 推荐符文显示名称 | 后端 + Android | HeroDetailVO 新增 AugmentBriefVO、HeroDetailFragment 品质色 Chip |
+| Day 2 | L-02 登录对话框注册入口 | Android | dialog_login.xml 新增注册链接、RegisterDialog 实现 |
+| Day 3 | L-03 设置开关持久化验证 | Android | 验证 API 调用链路、添加 Toast 反馈 |
+| Day 3 | L-06 注释格式统一 | 后端 | Augment.java + Hero.java 注释修正 |
+| Day 4 | 16.0 基础设施准备 | 后端 | pom.xml + application.yml + Config 类 |
+
+### 第二周：数据采集（Task 16.1 + 16.2）
+
+| 日期 | 任务 | 涉及仓库 | 产出 |
+|------|------|----------|------|
+| Day 5 | 16.1 RiotDataDragonClient | 后端 | fetchChampionList() + fetchChampionDetail() + 异常处理 |
+| Day 6 | 16.1 RiotDataDragonClient（续） | 后端 | fetchChampionImages() + 数据映射 + 单元测试 |
+| Day 7 | 16.2 AramDataCollector | 后端 | collectAramStats() + Jsoup 解析 + 请求间隔 |
+| Day 8 | 16.2 AramDataCollector（续） | 后端 | collectAugmentStats() + 数据映射 + 单元测试 |
+
+### 第三周：数据聚合与验证（Task 16.3 + 16.4）
+
+| 日期 | 任务 | 涉及仓库 | 产出 |
+|------|------|----------|------|
+| Day 9 | 16.3 DataAggregatorService | 后端 | aggregateHeroData() + 清洗规则 + 去重逻辑 |
+| Day 10 | 16.3 DataAggregatorService（续） | 后端 | aggregateAugmentData() + 集成测试 |
+| Day 11 | 16.4 MultiSourceValidator | 后端 | validateHeroStats() + 置信度分级 + ValidationResult |
+| Day 12 | 16.4 MultiSourceValidator（续） | 后端 | validateAugmentStats() + 集成测试 |
+
+### 第四周：调度与缓存（Task 16.5 + 16.6）
+
+| 日期 | 任务 | 涉及仓库 | 产出 |
+|------|------|----------|------|
+| Day 13 | 16.5 DataSyncScheduler | 后端 | syncAllData() + Redis 分布式锁 + 同步日志 |
+| Day 14 | 16.5 DataSyncScheduler（续） | 后端 | AdminController 手动触发接口 + 集成测试 |
+| Day 15 | 16.6 CacheWarmupService | 后端 | warmupHeroCache() + warmupAugmentCache() + 缓存清理 |
+| Day 16 | 16.6 CacheWarmupService（续） | 后端 | warmupHeroListCache() + 全链路集成测试 |
+
+## 9.3 新增文件清单
+
+### 后端新增文件
+
+| 文件路径 | 说明 |
+|----------|------|
+| `config/SchedulingConfig.java` | @EnableScheduling 配置类 |
+| `config/RestTemplateConfig.java` | RestTemplate Bean（超时 30s） |
+| `client/RiotDataDragonClient.java` | Riot Data Dragon API 客户端 |
+| `client/AramDataCollector.java` | U.GG / ARAMMayhem 数据采集器 |
+| `service/DataAggregatorService.java` | 多源数据聚合与清洗 |
+| `service/MultiSourceValidator.java` | 交叉验证与置信度评估 |
+| `scheduler/DataSyncScheduler.java` | 定时同步调度器 |
+| `service/CacheWarmupService.java` | Redis 缓存预热服务 |
+| `dto/AugmentBriefVO.java` | 符文简要信息 VO（id + nameZh + quality + iconUrl） |
+| `dto/ValidationResult.java` | 验证结果 DTO（confidenceLevel + 差异详情） |
+| `dto/SyncResult.java` | 同步结果 DTO（耗时 + 成功/失败数 + 异常详情） |
+
+### 后端修改文件
+
+| 文件路径 | 修改内容 |
+|----------|----------|
+| `pom.xml` | 新增 jsoup + spring-boot-starter-webflux 依赖 |
+| `application.yml` | 新增 datadragon.base-url / aramdata.base-url / sync.cron 配置 |
+| `entity/Augment.java` | winRate 注释修正 |
+| `entity/Hero.java` | winRate 注释修正 |
+| `dto/HeroDetailVO.java` | recommendedAugments 由 List<Long> 改为 List<AugmentBriefVO> |
+| `service/impl/HeroServiceImpl.java` | getHeroDetail() 查询 Augment 表填充名称 |
+| `controller/AdminController.java` | 新增 POST /api/admin/sync/trigger 手动同步接口 |
+
+### Android 修改文件
+
+| 文件路径 | 修改内容 |
+|----------|----------|
+| `dialog_login.xml` | 新增"去注册"链接 |
+| `ProfileFragment.java` | showLoginDialog() 添加注册跳转 |
+| `HeroDetailUiModel.java` | 新增 recommendedAugments 字段 |
+| `HeroDetailFragment.java` | updateRecommendedAugments() 改为名称 + 品质色 Chip |
+
+## 9.4 技术决策预研
+
+| 编号 | 决策 | 方案 | 理由 |
+|------|------|------|------|
+| D-68 | 数据采集 HTTP 客户端 | RestTemplate（同步） | 数据同步为后台批处理任务，无需非阻塞；WebClient 仅作依赖备用 |
+| D-69 | HTML 解析库 | Jsoup 1.17.x | Java 生态最成熟的 HTML 解析库，CSS Selector 语法简洁 |
+| D-70 | 同步锁策略 | Redis SETNX + TTL 30min | 防止多实例重复同步，30min 足够覆盖一次全量同步 |
+| D-71 | 置信度分级阈值 | ≤2%=HIGH, 2%~5%=MEDIUM, >5%=LOW | 2% 为 ARAM 数据正常波动范围，5% 以上可能存在数据源异常 |
+| D-72 | 推荐符文 VO 设计 | AugmentBriefVO（id/nameZh/quality/iconUrl） | 最小化数据传输，仅包含 Chip 展示所需字段 |
+| D-73 | 注册入口实现方式 | Dialog 内切换（登录↔注册） | 保持单页简洁，避免新增 Fragment 增加导航复杂度 |
+
+## 9.5 风险预判
+
+| 风险 | 概率 | 影响 | 缓解措施 |
+|------|------|------|----------|
+| U.GG 页面结构变更导致 Jsoup 解析失败 | 中 | 高 | 捕获 Selector 异常 + 日志告警 + 降级使用上次有效数据 |
+| Data Dragon API 限流/不可用 | 低 | 高 | 本地缓存最新版本号 + 请求失败时跳过本次同步 |
+| 反爬机制封禁 IP | 中 | 中 | 请求间隔 2s + 随机 User-Agent + 降级策略 |
+| 同步任务执行时间过长 | 低 | 中 | Redis 锁 TTL 30min + 同步日志监控 + 分批处理 |
+| HeroDetailVO 字段变更影响 Android 缓存 | 中 | 低 | Room 数据库版本升级 v4→v5 + Migration 策略 |

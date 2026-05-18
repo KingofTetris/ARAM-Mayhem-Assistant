@@ -138,15 +138,74 @@
   - [x] 15.6 开发 MyStrategiesFragment：RecyclerView 我的投稿 + ItemTouchHelper 滑动删除 + AlertDialog 确认
   - [x] 15.7 退出登录：清除 EncryptedSharedPreferences Token + 重启 MainActivity + 登录对话框
 
-## 阶段九：数据管线（M9）
+## 阶段九：数据管线 + 遗留修复（M9）
+
+### M8 遗留问题修复（优先处理）
+
+- [ ] Task 16-L: M8 遗留问题修复
+  - [ ] L-01 HeroDetailFragment 推荐强化符文显示 ID 而非名称
+    - 后端：HeroDetailVO.recommendedAugments 字段由 List<Long> 改为 List<AugmentBriefVO>（id + nameZh + quality + iconUrl）
+    - 后端：HeroServiceImpl.getHeroDetail() 查询关联 Augment 表填充名称/品质/图标
+    - Android：HeroDetailUiModel 新增 recommendedAugments: List<AugmentBrief> 字段
+    - Android：HeroDetailFragment.updateRecommendedAugments() 改为显示名称 + 品质色 Chip
+  - [ ] L-02 ProfileFragment 登录对话框未实现"注册"入口
+    - Android：dialog_login.xml 新增"没有账号？去注册"TextView 链接
+    - Android：ProfileFragment.showLoginDialog() 添加注册跳转逻辑
+    - Android：新增 RegisterDialog 或跳转到独立 RegisterFragment（邮箱 + 密码 + 确认密码）
+  - [ ] L-03 SettingsFragment 开关未实际持久化到后端
+    - 验证：ProfileViewModel.updateProfile() 已调用 ProfileRepository → ProfileApi → PATCH /api/users/me
+    - 验证：UserServiceImpl.updateProfile() 已实现 displayMode/notificationEnabled 更新
+    - 修复：检查 ProfileApi.updateProfile() 返回值是否正确刷新 UI 状态；添加 Toast 反馈
+  - [ ] L-06 Augment 实体注释 winRate "0~1 之间" 与实际百分比格式不一致
+    - 后端：Augment.java winRate 字段注释改为"ARAM 胜率（百分比格式，如 52.30 表示 52.30%）"
+    - 后端：Hero.java winRate 字段注释同步修正
+    - 后端：确认所有 Service 层胜率比较逻辑使用统一格式
+
+### 数据管线核心任务
 
 - [ ] Task 16: 数据采集与同步
-  - [ ] 16.1 实现 RiotDataDragonClient（RestTemplate / WebClient 调用 Data Dragon API，解析英雄 JSON）
+  - [ ] 16.0 后端依赖与基础设施准备
+    - pom.xml 新增 Jsoup 依赖（HTML 解析）
+    - pom.xml 新增 spring-boot-starter-webflux（WebClient 非阻塞 HTTP 客户端）
+    - application.yml 新增数据源配置（Data Dragon base URL、U.GG base URL、同步 cron 表达式）
+    - 新增 config/SchedulingConfig.java（@EnableScheduling 配置类）
+    - 新增 config/RestTemplateConfig.java（RestTemplate Bean 配置，超时 30s）
+  - [ ] 16.1 实现 RiotDataDragonClient（RestTemplate 调用 Data Dragon API，解析英雄 JSON）
+    - 新增 client/RiotDataDragonClient.java
+    - fetchChampionList()：GET /api/versions → 获取最新版本号 → GET /cdn/{version}/data/zh_CN/champion.json
+    - fetchChampionDetail(championKey)：GET /cdn/{version}/data/zh_CN/champion/{key}.json → 解析技能/被动/图标
+    - fetchChampionImages(version, championKey)：下载头像/技能图标 URL 列表
+    - 异常处理：网络超时 → 返回空结果 + 日志告警；JSON 解析失败 → 跳过该英雄
   - [ ] 16.2 实现 AramDataCollector（RestTemplate 拉取 U.GG / ARAMMayhem 页面数据，Jsoup 解析 HTML）
+    - 新增 client/AramDataCollector.java
+    - collectAramStats()：GET U.GG ARAM 页面 → Jsoup 解析英雄胜率/选取率/梯级表格
+    - collectAugmentStats()：GET ARAMMayhem 强化符文页面 → Jsoup 解析符文胜率/品质/套装
+    - 数据映射：U.GG 胜率百分比 → BigDecimal 存储格式
+    - 异常处理：页面结构变更 → 捕获 Selector 异常 + 日志告警；反爬限制 → 添加请求间隔 2s
   - [ ] 16.3 实现 DataAggregatorService：多源数据清洗（去重、缺值填充 0、胜率范围校验 0-100%）
+    - 新增 service/DataAggregatorService.java
+    - aggregateHeroData()：合并 RiotDataDragon（基础信息）+ AramDataCollector（胜率数据）
+    - 数据清洗规则：胜率 < 0 或 > 100 → 标记异常 → 使用上次有效值；缺值字段填充默认值 0
+    - 去重逻辑：以 riotId 为主键，保留最新版本数据
+    - aggregateAugmentData()：合并多源符文数据，去重 + 范围校验
   - [ ] 16.4 实现 MultiSourceValidator：交叉验证（两源胜率 diff > 5% → 标记低置信度 confidence_level=LOW）
+    - 新增 service/MultiSourceValidator.java
+    - validateHeroStats()：比较 Data Dragon 与 U.GG 胜率差值
+    - 差值 ≤ 2% → confidence_level=HIGH；2%~5% → MEDIUM；> 5% → LOW
+    - validateAugmentStats()：同逻辑应用于强化符文
+    - 输出：ValidationResult（含 confidenceLevel + 差异详情）
   - [ ] 16.5 实现 DataSyncScheduler（@Scheduled cron = "0 0 */6 * * ?" 每 6 小时执行全量同步）
+    - 新增 scheduler/DataSyncScheduler.java
+    - syncAllData()：编排完整同步流程 → fetch → aggregate → validate → persist → warmup
+    - 同步锁：Redis SETNX 防止多实例重复同步
+    - 同步日志：记录每次同步耗时、成功/失败英雄数、异常详情
+    - 手动触发接口：AdminController 新增 POST /api/admin/sync/trigger（管理员手动触发同步）
   - [ ] 16.6 实现 CacheWarmupService：同步完成后调用 Redis（预热 Top 50 英雄详情 + 强化符文列表）
+    - 新增 service/CacheWarmupService.java
+    - warmupHeroCache()：查询 Top 50 英雄（按胜率 DESC）→ 写入 Redis（key=hero:detail:{id}，TTL=6h）
+    - warmupAugmentCache()：查询全量强化符文 → 写入 Redis（key=augment:list，TTL=6h）
+    - warmupHeroListCache()：预热英雄列表缓存（key=hero:list:*，TTL=10min）
+    - 清理旧缓存：同步前先清理过期的 hero:detail:* 和 augment:list 缓存
 
 ## 阶段十：测试与打包（M10）
 
@@ -190,7 +249,13 @@
 - Task 12~13 依赖 Task 3~5,6~7（社区模块依赖数据库 + 认证 + Android UI）
 - Task 14 依赖 Task 3,6~7（公告模块依赖数据库 + Android UI）
 - Task 15 依赖 Task 5,6~7（个人中心依赖认证 + Android UI）
+- Task 16-L 依赖 Task 15（遗留问题修复依赖 M8 个人中心代码）
 - Task 16 依赖 Task 3,4（数据管线依赖数据库 + 基础 API）
+- Task 16.1~16.2 可并行开发（不同数据源互不依赖）
+- Task 16.3 依赖 16.1+16.2（聚合依赖多源数据）
+- Task 16.4 依赖 16.3（验证依赖聚合结果）
+- Task 16.5 依赖 16.3+16.4（调度编排依赖聚合+验证）
+- Task 16.6 依赖 16.5（缓存预热依赖同步完成）
 - Task 17~18 依赖所有前置任务
 - Task 19 依赖 Task 17~18（本地部署验证依赖测试与打包全部完成）
 
