@@ -3,7 +3,7 @@
 > 本文档按开发阶段分节记录所有关键操作、技术决策、问题与解决方案。
 > 最后更新：2026-05-19
 > 当前进度：M8 个人中心模块已完成 ✅，M8 遗留修复已完成 ✅，M9 数据管线 进行中 🚧
-> 文档版本：v3.0（2026-05-19 M9 阶段详细迭代计划：4 周 Sprint + 技术债务清理 + 质量保障指标）
+> 文档版本：v3.1（2026-05-19 Sprint 1 Day 1 执行 + TD-01 详细分析 + Sprint 1 每日任务分解表）
 
 ---
 
@@ -1783,3 +1783,214 @@ M9 阶段分为三大板块：
 | CP-2 | 06-01 | Sprint 2 完成 | 数据聚合 + 验证 + Controller 测试修复全部通过 |
 | CP-3 | 06-07 | Sprint 3 完成 | 同步调度 + 缓存预热 + 技术债务清理全部完成 |
 | CP-4 | 06-11 | Sprint 4 完成 | 全链路集成测试通过 + 文档完整 + 代码已提交 |
+
+## 9.9 Sprint 1 每日任务分解表
+
+> Sprint 1 时间范围：05-19 ~ 05-25（Day 1-7）
+> Sprint 1 目标：基础设施搭建 + RiotDataDragonClient + AramDataCollector 数据采集客户端
+> Sprint 1 负责人：后端开发
+
+### Day 1（05-19）：基础设施搭建
+
+| 时间段 | 任务编号 | 工作内容 | 交付物 | 验收标准 |
+|--------|----------|----------|--------|----------|
+| 09:00-10:00 | 16.0-1 | pom.xml 新增 jsoup 1.17.2 + spring-boot-starter-webflux 依赖 | pom.xml 更新 | `mvn compile` 通过 |
+| 10:00-11:30 | 16.0-2 | application.yml 新增 datadragon/aramdata/sync 配置项 | application.yml 更新 | @Value 注入测试通过 |
+| 13:30-15:30 | 16.0-3 | SchedulingConfig + RestTemplateConfig 配置类 | 2 个 Config 类 | Bean 正常注入 |
+| 15:30-17:30 | 16.1-1 | RiotDataDragonClient.fetchLatestVersion() + fetchChampionList() | 客户端类 + 单元测试 | 19 个单元测试通过 |
+
+**Day 1 实际完成情况**：✅ 全部完成
+- 16.0-1：pom.xml 新增 jsoup 1.17.2 + spring-boot-starter-webflux ✅
+- 16.0-2：application.yml 新增 datadragon/aramdata/sync 配置 ✅
+- 16.0-3：SchedulingConfig + RestTemplateConfig 创建完成 ✅
+- 16.1-1~16.1-4：RiotDataDragonClient 全部方法实现 + 19 个单元测试通过 ✅
+
+### Day 2（05-20）：RiotDataDragonClient 英雄详情
+
+| 时间段 | 任务编号 | 工作内容 | 交付物 | 验收标准 |
+|--------|----------|----------|--------|----------|
+| 09:00-12:00 | 16.1-2 | fetchChampionDetail() + extractStats() | 方法实现 + 测试 | 详情解析测试通过 |
+| 13:30-17:30 | 16.1-3 | fetchChampionImages() + 图片 URL 构建 | 方法实现 + 测试 | 图片 URL 测试通过 |
+
+### Day 3（05-21）：RiotDataDragonClient 异常处理
+
+| 时间段 | 任务编号 | 工作内容 | 交付物 | 验收标准 |
+|--------|----------|----------|--------|----------|
+| 09:00-12:00 | 16.1-4 | 异常处理完善（超时/解析失败/null 响应降级） | 异常场景测试 | 异常场景 100% 覆盖 |
+| 13:30-17:30 | 16.2-1 | AramDataCollector.collectAramStats() 开始 | Jsoup 解析框架 | 编译通过 |
+
+### Day 4（05-22）：AramDataCollector 英雄胜率
+
+| 时间段 | 任务编号 | 工作内容 | 交付物 | 验收标准 |
+|--------|----------|----------|--------|----------|
+| 09:00-12:00 | 16.2-1 | AramDataCollector.collectAramStats() 完成 | Jsoup 解析英雄胜率/选取率 | 单元测试通过 |
+| 13:30-17:30 | 16.2-1 | 请求间隔 + 随机 User-Agent 反爬策略 | 反爬策略实现 | 间隔 ≥2s 验证通过 |
+
+### Day 5（05-23）：AramDataCollector 符文数据
+
+| 时间段 | 任务编号 | 工作内容 | 交付物 | 验收标准 |
+|--------|----------|----------|--------|----------|
+| 09:00-12:00 | 16.2-2 | AramDataCollector.collectAugmentStats() | Jsoup 解析符文胜率/品质 | 单元测试通过 |
+| 13:30-17:30 | 16.2-2 | 符文套装数据解析 | 套装进度数据 | 单元测试通过 |
+
+### Day 6（05-24）：AramDataCollector 异常处理
+
+| 时间段 | 任务编号 | 工作内容 | 交付物 | 验收标准 |
+|--------|----------|----------|--------|----------|
+| 09:00-12:00 | 16.2-3 | 异常处理 + 降级策略 | 网络异常/解析失败降级 | 异常场景测试通过 |
+| 13:30-17:30 | 16.2-3 | AramDataCollector 单元测试完善 | 完整测试套件 | 覆盖率 ≥80% |
+
+### Day 7（05-25）：Sprint 1 收尾 + CP-1 检查
+
+| 时间段 | 任务编号 | 工作内容 | 交付物 | 验收标准 |
+|--------|----------|----------|--------|----------|
+| 09:00-12:00 | CP-1 | Sprint 1 里程碑检查 | 检查报告 | 全部验收标准通过 |
+| 13:30-17:30 | - | 代码审查 + 重构 + 文档更新 | dev-log.md 更新 | 日志完整 |
+
+### Sprint 1 验收标准汇总
+
+| 验收维度 | 具体指标 | 通过标准 |
+|----------|----------|----------|
+| 功能验证 | RiotDataDragonClient 5 个方法 | 全部返回正确数据 |
+| 功能验证 | AramDataCollector 2 个方法 | 全部返回正确数据 |
+| 性能指标 | RestTemplate 超时配置 | 连接 30s / 读取 30s |
+| 性能指标 | AramDataCollector 请求间隔 | ≥2s |
+| 代码质量 | 无 Checkstyle 违规 | mvn checkstyle:check 通过 |
+| 代码质量 | 无 SpotBugs 违规 | mvn spotbugs:check 通过 |
+| 测试覆盖 | RiotDataDragonClientTest | ≥15 个测试用例 |
+| 测试覆盖 | AramDataCollectorTest | ≥10 个测试用例 |
+| 测试覆盖 | 异常场景覆盖 | 100% |
+
+## 9.10 TD-01 后端 Controller 测试失败详细分析
+
+> 分析日期：2026-05-19
+> 分析人：后端开发
+> 关联技术债务：TD-01（27 个 @WebMvcTest 上下文加载失败）
+
+### 9.10.1 失败现象
+
+执行 `mvn test "-Dtest=*ControllerTest"` 时，4 个 Controller 测试类全部上下文加载失败：
+
+| 测试类 | 测试方法数 | 上下文加载 | 测试结果 |
+|--------|-----------|-----------|----------|
+| BulletinControllerTest | 4 | ❌ 失败 | 0/4 通过 |
+| UserControllerTest | 8 | ❌ 失败 | 0/8 通过 |
+| VoteControllerTest | 8 | ❌ 失败 | 0/8 通过 |
+| StrategyControllerTest | 7 | ❌ 失败 | 0/7 通过 |
+
+**总计**：27 个测试方法，0 个通过，27 个失败
+
+### 9.10.2 根因分析
+
+**根本原因**：`@WebMvcTest` 仅加载 Web 层 Bean，但 `SecurityConfig` 引入了 `JwtAuthenticationFilter`，而 `JwtAuthenticationFilter` 的构造函数依赖 `JwtTokenProvider` 和 `UserDetailsService`，这两个 Bean 不在 `@WebMvcTest` 的自动扫描范围内。
+
+**错误链路**：
+```
+@WebMvcTest 启动
+  → SecurityConfig 被加载（@Configuration + @EnableWebSecurity）
+    → SecurityFilterChain Bean 创建
+      → JwtAuthenticationFilter 被注入（@Component）
+        → 构造函数参数 0: JwtTokenProvider → ❌ 找不到 Bean
+        → 构造函数参数 1: UserDetailsService → ❌ 找不到 Bean
+  → ApplicationContext 创建失败
+  → 所有测试方法抛出 IllegalStateException
+```
+
+**关键错误日志**：
+```
+Error creating bean with name 'jwtAuthenticationFilter':
+  Unsatisfied dependency expressed through constructor parameter 0:
+  No qualifying bean of type 'com.aram.mayhem.security.JwtTokenProvider' available
+```
+
+### 9.10.3 各测试类 MockBean 缺失分析
+
+| 测试类 | 已有 MockBean | 缺失的 MockBean | 是否禁用 Security |
+|--------|--------------|----------------|-------------------|
+| BulletinControllerTest | BulletinService | JwtTokenProvider, UserDetailsService | ✅ 是（addFilters=false） |
+| UserControllerTest | UserService | JwtTokenProvider, UserDetailsService | ❌ 否 |
+| VoteControllerTest | StrategyService | JwtTokenProvider, UserDetailsService | ❌ 否 |
+| StrategyControllerTest | StrategyService | JwtTokenProvider, UserDetailsService | ❌ 否 |
+
+**注意**：BulletinControllerTest 虽然使用了 `@AutoConfigureMockMvc(addFilters = false)` 禁用了 Security Filter，但 `SecurityConfig` 仍然会被加载，`JwtAuthenticationFilter` 仍然需要其依赖 Bean。
+
+### 9.10.4 修复方案
+
+**方案 A（推荐）：在每个 Controller 测试中补充 @MockBean**
+
+```java
+@WebMvcTest(UserController.class)
+class UserControllerTest {
+    @MockBean private UserService userService;
+    @MockBean private JwtTokenProvider jwtTokenProvider;      // 新增
+    @MockBean private UserDetailsService userDetailsService;  // 新增
+    // ...
+}
+```
+
+**优点**：最小改动，保持 @WebMvcTest 的轻量级上下文
+**缺点**：每个测试类都需要重复声明
+
+**方案 B：创建 @TestConfiguration 公共基类**
+
+```java
+public abstract class BaseControllerTest {
+    @MockBean protected JwtTokenProvider jwtTokenProvider;
+    @MockBean protected UserDetailsService userDetailsService;
+}
+
+@WebMvcTest(UserController.class)
+class UserControllerTest extends BaseControllerTest {
+    @MockBean private UserService userService;
+    // ...
+}
+```
+
+**优点**：消除重复，统一管理
+**缺点**：引入继承关系
+
+**方案 C：使用 @Import 导入测试专用 SecurityConfig**
+
+```java
+@WebMvcTest(controllers = UserController.class, excludeFilters = ...)
+@Import(TestSecurityConfig.class)
+class UserControllerTest { ... }
+
+@TestConfiguration
+static class TestSecurityConfig {
+    @Bean @Primary
+    SecurityFilterChain testSecurityFilterChain(HttpSecurity http) {
+        http.csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+        return http.build();
+    }
+}
+```
+
+**优点**：完全替换 Security 配置，最干净
+**缺点**：无法测试权限控制逻辑
+
+### 9.10.5 推荐修复策略
+
+采用 **方案 A + 方案 C 组合**：
+
+1. **不需要测试权限的 Controller**（BulletinController）：使用 `@AutoConfigureMockMvc(addFilters = false)` + 补充 `@MockBean`
+2. **需要测试权限的 Controller**（User/Vote/Strategy）：补充 `@MockBean`，保留 Security Filter 以测试 401/403
+
+### 9.10.6 复现步骤
+
+1. 进入后端项目目录：`cd D:\ideaProjects\aram-server`
+2. 执行：`mvn test "-Dtest=UserControllerTest,VoteControllerTest,StrategyControllerTest,BulletinControllerTest"`
+3. 预期结果：27 个测试全部失败，错误信息为 `No qualifying bean of type 'JwtTokenProvider'`
+4. 修复后预期：27 个测试全部通过
+
+### 9.10.7 修复工作量估算
+
+| 步骤 | 工作内容 | 预计工时 |
+|------|----------|----------|
+| 1 | 为 4 个 Controller 测试补充 @MockBean | 0.5h |
+| 2 | 运行测试验证上下文加载成功 | 0.5h |
+| 3 | 修复因 Mock 行为不匹配导致的测试断言失败 | 2h |
+| 4 | 验证全部 27 个测试通过 | 0.5h |
+| 5 | 补充缺失的权限测试用例 | 1.5h |
+| **合计** | | **5h** |
