@@ -142,24 +142,41 @@
 
 ### M8 遗留问题修复（优先处理）
 
-- [ ] Task 16-L: M8 遗留问题修复
-  - [ ] L-01 HeroDetailFragment 推荐强化符文显示 ID 而非名称
+- [x] Task 16-L: M8 遗留问题修复
+  - [x] L-01 HeroDetailFragment 推荐强化符文显示 ID 而非名称 ✅ 2026-05-18
     - 后端：HeroDetailVO.recommendedAugments 字段由 List<Long> 改为 List<AugmentBriefVO>（id + nameZh + quality + iconUrl）
     - 后端：HeroServiceImpl.getHeroDetail() 查询关联 Augment 表填充名称/品质/图标
     - Android：HeroDetailUiModel 新增 recommendedAugments: List<AugmentBrief> 字段
     - Android：HeroDetailFragment.updateRecommendedAugments() 改为显示名称 + 品质色 Chip
-  - [ ] L-02 ProfileFragment 登录对话框未实现"注册"入口
+  - [x] L-02 ProfileFragment 登录对话框未实现"注册"入口 ✅ 2026-05-18
     - Android：dialog_login.xml 新增"没有账号？去注册"TextView 链接
     - Android：ProfileFragment.showLoginDialog() 添加注册跳转逻辑
-    - Android：新增 RegisterDialog 或跳转到独立 RegisterFragment（邮箱 + 密码 + 确认密码）
-  - [ ] L-03 SettingsFragment 开关未实际持久化到后端
+    - Android：新增 RegisterDialog（邮箱 + 密码 + 确认密码）
+  - [x] L-03 SettingsFragment 开关未实际持久化到后端 ✅ 2026-05-18
     - 验证：ProfileViewModel.updateProfile() 已调用 ProfileRepository → ProfileApi → PATCH /api/users/me
     - 验证：UserServiceImpl.updateProfile() 已实现 displayMode/notificationEnabled 更新
-    - 修复：检查 ProfileApi.updateProfile() 返回值是否正确刷新 UI 状态；添加 Toast 反馈
-  - [ ] L-06 Augment 实体注释 winRate "0~1 之间" 与实际百分比格式不一致
+    - 修复：添加 Toast 反馈 + Timber 日志埋点
+  - [x] L-06 Augment 实体注释 winRate "0~1 之间" 与实际百分比格式不一致 ✅ 2026-05-18
     - 后端：Augment.java winRate 字段注释改为"ARAM 胜率（百分比格式，如 52.30 表示 52.30%）"
     - 后端：Hero.java winRate 字段注释同步修正
     - 后端：确认所有 Service 层胜率比较逻辑使用统一格式
+
+### M9 技术债务清理（新增）
+
+- [ ] Task 16-T: M9 技术债务清理
+  - [ ] T3 后端 Controller 测试修复（27 个 @WebMvcTest 上下文加载失败）
+    - 补充 Redis/DataSource MockBean 配置
+    - 逐个修复 27 个失败测试
+  - [ ] T4 feature-profile 单元测试补充
+    - 新增 ProfileViewModelTest（登录/注册/退出核心路径）
+  - [ ] T5 Checkstyle/SpotBugs ignoreFailures→false
+    - 先修复现有违规项
+    - 再将 ignoreFailures 改为 false
+  - [ ] T6 Room Migration v4→v5 策略实现
+    - 新增 MigrationV4ToV5 类
+    - 替换 fallbackToDestructiveMigration
+  - [ ] T7 AdminController 权限校验
+    - 添加 @PreAuthorize("hasRole('ADMIN')") 注解
 
 ### 数据管线核心任务
 

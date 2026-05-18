@@ -1,9 +1,9 @@
 # ARAM Mayhem Assistant 开发日志
 
 > 本文档按开发阶段分节记录所有关键操作、技术决策、问题与解决方案。
-> 最后更新：2026-05-18
+> 最后更新：2026-05-19
 > 当前进度：M8 个人中心模块已完成 ✅，M8 遗留修复已完成 ✅，M9 数据管线 进行中 🚧
-> 文档版本：v2.9（2026-05-18 M8 遗留修复完成报告 + 测试修复 + 日志埋点）
+> 文档版本：v3.0（2026-05-19 M9 阶段详细迭代计划：4 周 Sprint + 技术债务清理 + 质量保障指标）
 
 ---
 
@@ -1523,105 +1523,170 @@ FrameLayout
 
 # 第九阶段：数据管线 + 遗留修复（M9）
 
-> 开始日期：2026-05-16
-> 阶段状态：🚧 进行中（L-01/L-02/L-03/L-06 已完成）
+> 开始日期：2026-05-19
+> 阶段状态：🚧 进行中（L-01/L-02/L-03/L-06 已完成，数据管线待启动）
 > 前置依赖：M1~M8 全部完成
+> 计划版本：v1.0（2026-05-19）
+
+## 9.0 M8 遗留风险与技术债务清单
+
+> 本节汇总 M8 阶段遗留的所有风险、未解决问题及技术债务，作为 M9 迭代计划的输入。
+
+### 9.0.1 遗留风险（来自 8.5.7 仍存风险）
+
+| 编号 | 风险描述 | 严重度 | 来源 | M9 处理策略 |
+|------|----------|--------|------|-------------|
+| R-01 | 后端 Controller 层 27 个 @WebMvcTest 上下文加载失败 | 🟠 中 | M8 测试阶段 | M9-T3 专项修复 |
+| R-02 | feature-profile 无单元测试 | 🟡 低 | M8 测试阶段 | M9-T4 补充 |
+| R-03 | Checkstyle/SpotBugs ignoreFailures=true | 🟡 低 | M8 L-04 | M9-T5 修复 |
+| R-04 | fallbackToDestructiveMigration | 🟡 低 | M8 L-05 | M9-T6 修复 |
+
+### 9.0.2 未解决问题（来自 M8 遗留修复仍存项）
+
+| 编号 | 问题 | 优先级 | 状态 | M9 处理策略 |
+|------|------|--------|------|-------------|
+| L-04 | Checkstyle/SpotBugs ignoreFailures=true | P3 | 待修复 | M9-T5 |
+| L-05 | 数据库 fallbackToDestructiveMigration | P3 | 待修复 | M9-T6 |
+
+### 9.0.3 技术债务
+
+| 编号 | 债务描述 | 影响 | 累计时间 | M9 处理策略 |
+|------|----------|------|----------|-------------|
+| TD-01 | 后端 Controller 测试全量失败（27 个） | 回归测试无法覆盖 API 层 | M7 引入 | M9-T3 |
+| TD-02 | Android feature-profile 零测试覆盖 | 个人中心模块无质量保障 | M8 引入 | M9-T4 |
+| TD-03 | Room 数据库无 Migration 策略 | 版本升级时用户数据丢失 | M8 引入 | M9-T6 |
+| TD-04 | 静态分析工具形同虚设（ignoreFailures=true） | 代码质量问题无法自动拦截 | M8 引入 | M9-T5 |
+| TD-05 | 后端缺少 AdminController 权限校验 | 任何认证用户可触发管理操作 | M7 引入 | M9-T7 |
 
 ## 9.1 阶段目标与范围
 
-M9 阶段分为两大板块：
+M9 阶段分为三大板块：
 
-1. **M8 遗留问题修复（Task 16-L）**：修复 M8 阶段遗留的 4 个功能不完整问题
-2. **数据管线核心（Task 16）**：实现多源数据采集、清洗、验证、同步、缓存预热全链路
+1. **数据管线核心（Task 16）**：实现多源数据采集、清洗、验证、同步、缓存预热全链路
+2. **技术债务清理（Task 16-T）**：修复 M8 遗留的 5 项技术债务
+3. **质量保障加固（Task 16-Q）**：补充测试覆盖、修复静态分析、实现数据库 Migration
 
 ### 阶段目标
 
 | 目标 | 描述 | 验收标准 |
 |------|------|----------|
-| 遗留修复 | 修复 L-01/L-02/L-03/L-06 四个遗留问题 | 英雄详情推荐符文显示名称、登录对话框有注册入口、设置开关持久化、注释格式一致 |
 | 数据采集 | 实现 Riot Data Dragon + U.GG 双源数据采集 | 可成功拉取英雄基础信息和 ARAM 胜率数据 |
 | 数据清洗 | 多源数据合并、去重、范围校验 | 胜率数据在 0-100% 范围内，缺值填充默认值 |
 | 交叉验证 | 双源数据一致性校验 | 差值 >5% 标记 LOW 置信度 |
 | 定时同步 | 每 6 小时自动全量同步 | @Scheduled 正常触发，Redis 分布式锁防重复 |
 | 缓存预热 | 同步后自动预热 Redis | Top 50 英雄详情 + 符文列表缓存就绪 |
+| Controller 测试修复 | 27 个 @WebMvcTest 全部通过 | CI 回归测试覆盖 API 层 |
+| Profile 测试补充 | feature-profile 单元测试覆盖 | 登录/注册/退出核心路径有测试 |
+| 静态分析生效 | Checkstyle/SpotBugs ignoreFailures=false | 构建时自动拦截代码质量问题 |
+| 数据库 Migration | Room Migration v4→v5 策略 | 版本升级不丢失用户数据 |
+| Admin 权限校验 | AdminController 接口仅管理员可访问 | 非管理员调用返回 403 |
 
-## 9.2 任务执行计划
+## 9.2 迭代计划（4 周冲刺）
 
-### 第一周：遗留修复 + 基础设施（Task 16-L + 16.0）
+### Sprint 1：基础设施 + 数据采集（Day 1-7）
 
-| 日期 | 任务 | 涉及仓库 | 产出 |
-|------|------|----------|------|
-| Day 1 | L-01 推荐符文显示名称 | 后端 + Android | HeroDetailVO 新增 AugmentBriefVO、HeroDetailFragment 品质色 Chip |
-| Day 2 | L-02 登录对话框注册入口 | Android | dialog_login.xml 新增注册链接、RegisterDialog 实现 |
-| Day 3 | L-03 设置开关持久化验证 | Android | 验证 API 调用链路、添加 Toast 反馈 |
-| Day 3 | L-06 注释格式统一 | 后端 | Augment.java + Hero.java 注释修正 |
-| Day 4 | 16.0 基础设施准备 | 后端 | pom.xml + application.yml + Config 类 |
+| 日期 | 任务编号 | 任务名称 | 涉及仓库 | 产出 | 验收标准 |
+|------|----------|----------|----------|------|----------|
+| Day 1 | 16.0-1 | pom.xml 新增 Jsoup + WebClient 依赖 | 后端 | pom.xml 更新 | `mvn compile` 通过 |
+| Day 1 | 16.0-2 | application.yml 新增数据源配置 | 后端 | datadragon/aramdata/sync 配置项 | 配置项可注入 |
+| Day 1 | 16.0-3 | SchedulingConfig + RestTemplateConfig | 后端 | @EnableScheduling + RestTemplate Bean | Bean 正常注入 |
+| Day 2 | 16.1-1 | RiotDataDragonClient.fetchChampionList() | 后端 | 获取版本号 + 英雄列表 JSON | 单元测试通过 |
+| Day 3 | 16.1-2 | RiotDataDragonClient.fetchChampionDetail() | 后端 | 解析技能/被动/图标 URL | 单元测试通过 |
+| Day 3 | 16.1-3 | RiotDataDragonClient.fetchChampionImages() | 后端 | 下载头像/技能图标 URL 列表 | 单元测试通过 |
+| Day 4 | 16.1-4 | RiotDataDragonClient 异常处理 + 单元测试 | 后端 | 超时/解析失败降级逻辑 | 异常场景测试通过 |
+| Day 5 | 16.2-1 | AramDataCollector.collectAramStats() | 后端 | Jsoup 解析英雄胜率/选取率/梯级 | 单元测试通过 |
+| Day 6 | 16.2-2 | AramDataCollector.collectAugmentStats() | 后端 | Jsoup 解析符文胜率/品质/套装 | 单元测试通过 |
+| Day 7 | 16.2-3 | AramDataCollector 异常处理 + 请求间隔 | 后端 | 反爬策略 + 降级逻辑 | 异常场景测试通过 |
 
-### 第二周：数据采集（Task 16.1 + 16.2）
+### Sprint 2：数据聚合 + 验证（Day 8-14）
 
-| 日期 | 任务 | 涉及仓库 | 产出 |
-|------|------|----------|------|
-| Day 5 | 16.1 RiotDataDragonClient | 后端 | fetchChampionList() + fetchChampionDetail() + 异常处理 |
-| Day 6 | 16.1 RiotDataDragonClient（续） | 后端 | fetchChampionImages() + 数据映射 + 单元测试 |
-| Day 7 | 16.2 AramDataCollector | 后端 | collectAramStats() + Jsoup 解析 + 请求间隔 |
-| Day 8 | 16.2 AramDataCollector（续） | 后端 | collectAugmentStats() + 数据映射 + 单元测试 |
+| 日期 | 任务编号 | 任务名称 | 涉及仓库 | 产出 | 验收标准 |
+|------|----------|----------|----------|------|----------|
+| Day 8 | 16.3-1 | DataAggregatorService.aggregateHeroData() | 后端 | 合并 RiotDataDragon + AramDataCollector | 单元测试通过 |
+| Day 9 | 16.3-2 | DataAggregatorService.aggregateAugmentData() | 后端 | 合并多源符文数据 | 单元测试通过 |
+| Day 9 | 16.3-3 | 数据清洗规则实现 | 后端 | 范围校验 + 缺值填充 + 去重 | 边界测试通过 |
+| Day 10 | 16.4-1 | MultiSourceValidator.validateHeroStats() | 后端 | 置信度分级 HIGH/MEDIUM/LOW | 单元测试通过 |
+| Day 11 | 16.4-2 | MultiSourceValidator.validateAugmentStats() | 后端 | 符文交叉验证 | 单元测试通过 |
+| Day 11 | 16.4-3 | ValidationResult DTO + 集成测试 | 后端 | 验证结果可序列化 | 集成测试通过 |
+| Day 12 | T3-1 | 后端 Controller 测试修复：补充 MockBean | 后端 | Redis/DataSource MockBean 配置 | @WebMvcTest 上下文加载成功 |
+| Day 13 | T3-2 | 后端 Controller 测试修复：逐个修复 27 个失败 | 后端 | 全部 Controller 测试通过 | `mvn test` 0 失败 |
+| Day 14 | T4-1 | feature-profile 单元测试：ProfileViewModel | Android | 登录/注册/退出测试 | 测试通过 |
 
-### 第三周：数据聚合与验证（Task 16.3 + 16.4）
+### Sprint 3：调度 + 缓存 + 技术债务（Day 15-21）
 
-| 日期 | 任务 | 涉及仓库 | 产出 |
-|------|------|----------|------|
-| Day 9 | 16.3 DataAggregatorService | 后端 | aggregateHeroData() + 清洗规则 + 去重逻辑 |
-| Day 10 | 16.3 DataAggregatorService（续） | 后端 | aggregateAugmentData() + 集成测试 |
-| Day 11 | 16.4 MultiSourceValidator | 后端 | validateHeroStats() + 置信度分级 + ValidationResult |
-| Day 12 | 16.4 MultiSourceValidator（续） | 后端 | validateAugmentStats() + 集成测试 |
+| 日期 | 任务编号 | 任务名称 | 涉及仓库 | 产出 | 验收标准 |
+|------|----------|----------|----------|------|----------|
+| Day 15 | 16.5-1 | DataSyncScheduler.syncAllData() | 后端 | 编排完整同步流程 | 单元测试通过 |
+| Day 15 | 16.5-2 | Redis 分布式锁（SETNX + TTL 30min） | 后端 | 防重复同步 | 并发测试通过 |
+| Day 16 | 16.5-3 | AdminController 手动触发接口 | 后端 | POST /api/admin/sync/trigger | 接口测试通过 |
+| Day 16 | 16.5-4 | 同步日志 + SyncResult DTO | 后端 | 记录耗时/成功/失败/异常 | 日志可查 |
+| Day 17 | 16.6-1 | CacheWarmupService.warmupHeroCache() | 后端 | Top 50 英雄详情写入 Redis | 缓存命中测试通过 |
+| Day 17 | 16.6-2 | CacheWarmupService.warmupAugmentCache() | 后端 | 全量符文写入 Redis | 缓存命中测试通过 |
+| Day 18 | 16.6-3 | CacheWarmupService.warmupHeroListCache() + 清理旧缓存 | 后端 | 列表缓存预热 + 过期清理 | 全链路集成测试通过 |
+| Day 19 | T5-1 | Checkstyle/SpotBugs ignoreFailures→false | Android | 构建时拦截质量问题 | 故意违规时构建失败 |
+| Day 19 | T5-2 | 修复现有 Checkstyle/SpotBugs 违规项 | Android | 零违规 | `./gradlew check` 通过 |
+| Day 20 | T6-1 | Room Migration v4→v5 策略实现 | Android | Migration 代码 + 测试 | 升级不丢数据 |
+| Day 21 | T7-1 | AdminController 权限校验 | 后端 | @PreAuthorize("hasRole('ADMIN')") | 非管理员返回 403 |
 
-### 第四周：调度与缓存（Task 16.5 + 16.6）
+### Sprint 4：集成测试 + 文档 + 收尾（Day 22-28）
 
-| 日期 | 任务 | 涉及仓库 | 产出 |
-|------|------|----------|------|
-| Day 13 | 16.5 DataSyncScheduler | 后端 | syncAllData() + Redis 分布式锁 + 同步日志 |
-| Day 14 | 16.5 DataSyncScheduler（续） | 后端 | AdminController 手动触发接口 + 集成测试 |
-| Day 15 | 16.6 CacheWarmupService | 后端 | warmupHeroCache() + warmupAugmentCache() + 缓存清理 |
-| Day 16 | 16.6 CacheWarmupService（续） | 后端 | warmupHeroListCache() + 全链路集成测试 |
+| 日期 | 任务编号 | 任务名称 | 涉及仓库 | 产出 | 验收标准 |
+|------|----------|----------|----------|------|----------|
+| Day 22 | 16.7-1 | 数据管线全链路集成测试 | 后端 | fetch→aggregate→validate→sync→warmup | 全链路测试通过 |
+| Day 23 | 16.7-2 | 数据管线异常场景集成测试 | 后端 | 网络超时/解析失败/锁竞争 | 降级策略验证通过 |
+| Day 24 | 16.7-3 | Android 端数据刷新验证 | Android | 同步后 App 数据更新 | 手动验证通过 |
+| Day 25 | 16.8-1 | M9 开发日志记录 | 任务仓库 | dev-log.md M9 全阶段记录 | 日志完整 |
+| Day 25 | 16.8-2 | tasks.md 更新 | 任务仓库 | Task 16 全部子项标记完成 | 状态准确 |
+| Day 26 | 16.8-3 | M9 阶段完成报告 | 任务仓库 | 含测试结果/风险/决策 | 报告完整 |
+| Day 27 | 16.9-1 | 代码审查 + 重构 | 全部 | 清理 TODO/临时方案 | 零 TODO |
+| Day 28 | 16.9-2 | M9 代码提交到远程仓库 | 全部 | 后端+Android+任务仓库 | push 成功 |
 
 ## 9.3 新增文件清单
 
 ### 后端新增文件
 
-| 文件路径 | 说明 |
-|----------|------|
-| `config/SchedulingConfig.java` | @EnableScheduling 配置类 |
-| `config/RestTemplateConfig.java` | RestTemplate Bean（超时 30s） |
-| `client/RiotDataDragonClient.java` | Riot Data Dragon API 客户端 |
-| `client/AramDataCollector.java` | U.GG / ARAMMayhem 数据采集器 |
-| `service/DataAggregatorService.java` | 多源数据聚合与清洗 |
-| `service/MultiSourceValidator.java` | 交叉验证与置信度评估 |
-| `scheduler/DataSyncScheduler.java` | 定时同步调度器 |
-| `service/CacheWarmupService.java` | Redis 缓存预热服务 |
-| `dto/AugmentBriefVO.java` | 符文简要信息 VO（id + nameZh + quality + iconUrl） |
-| `dto/ValidationResult.java` | 验证结果 DTO（confidenceLevel + 差异详情） |
-| `dto/SyncResult.java` | 同步结果 DTO（耗时 + 成功/失败数 + 异常详情） |
+| 文件路径 | 说明 | Sprint |
+|----------|------|--------|
+| `config/SchedulingConfig.java` | @EnableScheduling 配置类 | Sprint 1 |
+| `config/RestTemplateConfig.java` | RestTemplate Bean（超时 30s） | Sprint 1 |
+| `client/RiotDataDragonClient.java` | Riot Data Dragon API 客户端 | Sprint 1 |
+| `client/AramDataCollector.java` | U.GG / ARAMMayhem 数据采集器 | Sprint 1 |
+| `service/DataAggregatorService.java` | 多源数据聚合与清洗 | Sprint 2 |
+| `service/MultiSourceValidator.java` | 交叉验证与置信度评估 | Sprint 2 |
+| `dto/ValidationResult.java` | 验证结果 DTO（confidenceLevel + 差异详情） | Sprint 2 |
+| `dto/SyncResult.java` | 同步结果 DTO（耗时 + 成功/失败数 + 异常详情） | Sprint 3 |
+| `scheduler/DataSyncScheduler.java` | 定时同步调度器 | Sprint 3 |
+| `service/CacheWarmupService.java` | Redis 缓存预热服务 | Sprint 3 |
 
 ### 后端修改文件
 
-| 文件路径 | 修改内容 |
-|----------|----------|
-| `pom.xml` | 新增 jsoup + spring-boot-starter-webflux 依赖 |
-| `application.yml` | 新增 datadragon.base-url / aramdata.base-url / sync.cron 配置 |
-| `entity/Augment.java` | winRate 注释修正 |
-| `entity/Hero.java` | winRate 注释修正 |
-| `dto/HeroDetailVO.java` | recommendedAugments 由 List<Long> 改为 List<AugmentBriefVO> |
-| `service/impl/HeroServiceImpl.java` | getHeroDetail() 查询 Augment 表填充名称 |
-| `controller/AdminController.java` | 新增 POST /api/admin/sync/trigger 手动同步接口 |
+| 文件路径 | 修改内容 | Sprint |
+|----------|----------|--------|
+| `pom.xml` | 新增 jsoup + spring-boot-starter-webflux 依赖 | Sprint 1 |
+| `application.yml` | 新增 datadragon/aramdata/sync 配置 | Sprint 1 |
+| `controller/AdminController.java` | 新增 POST /api/admin/sync/trigger + @PreAuthorize | Sprint 3 |
+| `controller/AdminController.java` | 权限校验 @PreAuthorize("hasRole('ADMIN')") | Sprint 3 |
 
 ### Android 修改文件
 
-| 文件路径 | 修改内容 |
-|----------|----------|
-| `dialog_login.xml` | 新增"去注册"链接 |
-| `ProfileFragment.java` | showLoginDialog() 添加注册跳转 |
-| `HeroDetailUiModel.java` | 新增 recommendedAugments 字段 |
-| `HeroDetailFragment.java` | updateRecommendedAugments() 改为名称 + 品质色 Chip |
+| 文件路径 | 修改内容 | Sprint |
+|----------|----------|--------|
+| `app/build.gradle` | Checkstyle/SpotBugs ignoreFailures→false | Sprint 3 |
+| `core-data/.../AppDatabase.java` | Migration v4→v5 + 版本号更新 | Sprint 3 |
+| `core-data/.../MigrationV4ToV5.java` | 新增 Migration 类 | Sprint 3 |
+
+### 测试新增文件
+
+| 文件路径 | 说明 | Sprint |
+|----------|------|--------|
+| `test/.../client/RiotDataDragonClientTest.java` | Data Dragon 客户端单元测试 | Sprint 1 |
+| `test/.../client/AramDataCollectorTest.java` | 数据采集器单元测试 | Sprint 1 |
+| `test/.../service/DataAggregatorServiceTest.java` | 数据聚合服务单元测试 | Sprint 2 |
+| `test/.../service/MultiSourceValidatorTest.java` | 交叉验证服务单元测试 | Sprint 2 |
+| `test/.../scheduler/DataSyncSchedulerTest.java` | 同步调度器单元测试 | Sprint 3 |
+| `test/.../service/CacheWarmupServiceTest.java` | 缓存预热服务单元测试 | Sprint 3 |
+| `test/.../controller/*ControllerTest.java` | 修复 27 个 Controller 测试 | Sprint 2 |
+| `feature-profile/test/.../ProfileViewModelTest.java` | 个人中心 ViewModel 测试 | Sprint 2 |
 
 ## 9.4 技术决策预研
 
@@ -1631,15 +1696,90 @@ M9 阶段分为两大板块：
 | D-69 | HTML 解析库 | Jsoup 1.17.x | Java 生态最成熟的 HTML 解析库，CSS Selector 语法简洁 |
 | D-70 | 同步锁策略 | Redis SETNX + TTL 30min | 防止多实例重复同步，30min 足够覆盖一次全量同步 |
 | D-71 | 置信度分级阈值 | ≤2%=HIGH, 2%~5%=MEDIUM, >5%=LOW | 2% 为 ARAM 数据正常波动范围，5% 以上可能存在数据源异常 |
-| D-72 | 推荐符文 VO 设计 | AugmentBriefVO（id/nameZh/quality/iconUrl） | 最小化数据传输，仅包含 Chip 展示所需字段 |
-| D-73 | 注册入口实现方式 | Dialog 内切换（登录↔注册） | 保持单页简洁，避免新增 Fragment 增加导航复杂度 |
+| D-72 | 推荐符文 VO 设计 | AugmentBriefVO（id/nameZh/quality/iconUrl） | 最小化数据传输，仅包含 Chip 展示所需字段（已实现） |
+| D-73 | 注册入口实现方式 | Dialog 内切换（登录↔注册） | 保持单页简洁，避免新增 Fragment 增加导航复杂度（已实现） |
+| D-74 | Admin 权限校验方式 | @PreAuthorize("hasRole('ADMIN')") | Spring Security 原生注解，与现有 SecurityConfig 集成零成本 |
+| D-75 | Room Migration 策略 | 手写 Migration + 测试 | fallbackToDestructiveMigration 仅适用于开发阶段，生产必须手写 |
+| D-76 | 静态分析执行时机 | CI 构建时 + 本地 pre-commit | 双重保障，本地快速反馈 + CI 严格拦截 |
 
-## 9.5 风险预判
+## 9.5 风险预判与缓解
 
-| 风险 | 概率 | 影响 | 缓解措施 |
-|------|------|------|----------|
-| U.GG 页面结构变更导致 Jsoup 解析失败 | 中 | 高 | 捕获 Selector 异常 + 日志告警 + 降级使用上次有效数据 |
-| Data Dragon API 限流/不可用 | 低 | 高 | 本地缓存最新版本号 + 请求失败时跳过本次同步 |
-| 反爬机制封禁 IP | 中 | 中 | 请求间隔 2s + 随机 User-Agent + 降级策略 |
-| 同步任务执行时间过长 | 低 | 中 | Redis 锁 TTL 30min + 同步日志监控 + 分批处理 |
-| HeroDetailVO 字段变更影响 Android 缓存 | 中 | 低 | Room 数据库版本升级 v4→v5 + Migration 策略 |
+| 风险 | 概率 | 影响 | 缓解措施 | 负责人 |
+|------|------|------|----------|--------|
+| U.GG 页面结构变更导致 Jsoup 解析失败 | 中 | 高 | 捕获 Selector 异常 + 日志告警 + 降级使用上次有效数据 | 后端 |
+| Data Dragon API 限流/不可用 | 低 | 高 | 本地缓存最新版本号 + 请求失败时跳过本次同步 | 后端 |
+| 反爬机制封禁 IP | 中 | 中 | 请求间隔 2s + 随机 User-Agent + 降级策略 | 后端 |
+| 同步任务执行时间过长 | 低 | 中 | Redis 锁 TTL 30min + 同步日志监控 + 分批处理 | 后端 |
+| HeroDetailVO 字段变更影响 Android 缓存 | 中 | 低 | Room 数据库版本升级 v4→v5 + Migration 策略 | Android |
+| Controller 测试修复范围超出预期 | 中 | 中 | 优先修复核心 Controller（Hero/Auth），其余降级为 @SpringBootTest | 后端 |
+| Checkstyle 违规项过多导致构建阻塞 | 低 | 中 | 先修复再改 ignoreFailures，分两步执行 | Android |
+
+## 9.6 结构化待办事项列表
+
+### 数据管线核心（Task 16）
+
+| 任务编号 | 任务名称 | 负责人 | 预计工时 | 开始日期 | 截止日期 | 验收标准 | 优先级 |
+|----------|----------|--------|----------|----------|----------|----------|--------|
+| 16.0-1 | pom.xml 新增依赖 | 后端 | 0.5h | 05-19 | 05-19 | mvn compile 通过 | P0 |
+| 16.0-2 | application.yml 数据源配置 | 后端 | 0.5h | 05-19 | 05-19 | 配置项可 @Value 注入 | P0 |
+| 16.0-3 | SchedulingConfig + RestTemplateConfig | 后端 | 1h | 05-19 | 05-19 | Bean 正常注入 | P0 |
+| 16.1-1 | RiotDataDragonClient.fetchChampionList() | 后端 | 3h | 05-20 | 05-20 | 单元测试通过 | P0 |
+| 16.1-2 | RiotDataDragonClient.fetchChampionDetail() | 后端 | 3h | 05-21 | 05-21 | 单元测试通过 | P0 |
+| 16.1-3 | RiotDataDragonClient.fetchChampionImages() | 后端 | 2h | 05-21 | 05-21 | 单元测试通过 | P0 |
+| 16.1-4 | RiotDataDragonClient 异常处理 + 测试 | 后端 | 2h | 05-22 | 05-22 | 异常场景测试通过 | P0 |
+| 16.2-1 | AramDataCollector.collectAramStats() | 后端 | 4h | 05-23 | 05-23 | 单元测试通过 | P1 |
+| 16.2-2 | AramDataCollector.collectAugmentStats() | 后端 | 4h | 05-24 | 05-24 | 单元测试通过 | P1 |
+| 16.2-3 | AramDataCollector 异常处理 + 请求间隔 | 后端 | 2h | 05-25 | 05-25 | 异常场景测试通过 | P1 |
+| 16.3-1 | DataAggregatorService.aggregateHeroData() | 后端 | 3h | 05-26 | 05-26 | 单元测试通过 | P1 |
+| 16.3-2 | DataAggregatorService.aggregateAugmentData() | 后端 | 3h | 05-26 | 05-26 | 单元测试通过 | P1 |
+| 16.3-3 | 数据清洗规则实现 | 后端 | 2h | 05-27 | 05-27 | 边界测试通过 | P1 |
+| 16.4-1 | MultiSourceValidator.validateHeroStats() | 后端 | 3h | 05-28 | 05-28 | 单元测试通过 | P1 |
+| 16.4-2 | MultiSourceValidator.validateAugmentStats() | 后端 | 2h | 05-28 | 05-28 | 单元测试通过 | P1 |
+| 16.4-3 | ValidationResult DTO + 集成测试 | 后端 | 2h | 05-29 | 05-29 | 集成测试通过 | P1 |
+| 16.5-1 | DataSyncScheduler.syncAllData() | 后端 | 3h | 05-30 | 05-30 | 单元测试通过 | P1 |
+| 16.5-2 | Redis 分布式锁 | 后端 | 2h | 05-30 | 05-30 | 并发测试通过 | P1 |
+| 16.5-3 | AdminController 手动触发接口 | 后端 | 2h | 05-31 | 05-31 | 接口测试通过 | P1 |
+| 16.5-4 | 同步日志 + SyncResult DTO | 后端 | 1h | 05-31 | 05-31 | 日志可查 | P1 |
+| 16.6-1 | CacheWarmupService.warmupHeroCache() | 后端 | 2h | 06-01 | 06-01 | 缓存命中测试通过 | P1 |
+| 16.6-2 | CacheWarmupService.warmupAugmentCache() | 后端 | 2h | 06-01 | 06-01 | 缓存命中测试通过 | P1 |
+| 16.6-3 | warmupHeroListCache() + 清理旧缓存 | 后端 | 2h | 06-02 | 06-02 | 全链路集成测试通过 | P1 |
+| 16.7-1 | 数据管线全链路集成测试 | 后端 | 3h | 06-05 | 06-05 | 全链路测试通过 | P0 |
+| 16.7-2 | 数据管线异常场景集成测试 | 后端 | 3h | 06-06 | 06-06 | 降级策略验证通过 | P0 |
+| 16.7-3 | Android 端数据刷新验证 | Android | 2h | 06-07 | 06-07 | 手动验证通过 | P1 |
+| 16.8-1 | M9 开发日志记录 | 全栈 | 2h | 06-08 | 06-08 | 日志完整 | P1 |
+| 16.8-2 | tasks.md 更新 | 全栈 | 1h | 06-08 | 06-08 | 状态准确 | P1 |
+| 16.8-3 | M9 阶段完成报告 | 全栈 | 2h | 06-09 | 06-09 | 报告完整 | P1 |
+| 16.9-1 | 代码审查 + 重构 | 全栈 | 3h | 06-10 | 06-10 | 零 TODO | P2 |
+| 16.9-2 | M9 代码提交到远程仓库 | 全栈 | 1h | 06-11 | 06-11 | push 成功 | P2 |
+
+### 技术债务清理（Task 16-T）
+
+| 任务编号 | 任务名称 | 负责人 | 预计工时 | 开始日期 | 截止日期 | 验收标准 | 优先级 |
+|----------|----------|--------|----------|----------|----------|----------|--------|
+| T3-1 | Controller 测试 MockBean 配置 | 后端 | 3h | 05-29 | 05-29 | @WebMvcTest 上下文加载成功 | P1 |
+| T3-2 | 修复 27 个 Controller 测试 | 后端 | 4h | 05-30 | 05-30 | mvn test 0 失败 | P1 |
+| T4-1 | ProfileViewModel 单元测试 | Android | 3h | 05-31 | 05-31 | 登录/注册/退出测试通过 | P2 |
+| T5-1 | Checkstyle/SpotBugs ignoreFailures→false | Android | 1h | 06-02 | 06-02 | 故意违规时构建失败 | P2 |
+| T5-2 | 修复现有 Checkstyle/SpotBugs 违规项 | Android | 2h | 06-02 | 06-02 | ./gradlew check 通过 | P2 |
+| T6-1 | Room Migration v4→v5 | Android | 3h | 06-03 | 06-03 | 升级不丢数据 | P2 |
+| T7-1 | AdminController 权限校验 | 后端 | 2h | 06-04 | 06-04 | 非管理员返回 403 | P2 |
+
+## 9.7 质量保障指标
+
+| 指标 | 当前值 | M9 目标 | 测量方式 |
+|------|--------|---------|----------|
+| 后端 Service 测试覆盖率 | ~85%（78/78 通过） | ≥90% | JaCoCo 报告 |
+| 后端 Controller 测试覆盖率 | 0%（27/27 失败） | ≥80% | JaCoCo 报告 |
+| Android ViewModel 测试覆盖 | 2/3 模块 | 3/3 模块 | 测试文件数 |
+| 静态分析违规数 | 未知 | 0 | ./gradlew check |
+| 数据管线单元测试 | 0 | ≥20 个 | 测试文件数 |
+| 数据管线集成测试 | 0 | ≥5 个 | 测试文件数 |
+
+## 9.8 里程碑检查点
+
+| 检查点 | 日期 | 检查内容 | 通过标准 |
+|--------|------|----------|----------|
+| CP-1 | 05-25 | Sprint 1 完成 | RiotDataDragonClient + AramDataCollector 单元测试全部通过 |
+| CP-2 | 06-01 | Sprint 2 完成 | 数据聚合 + 验证 + Controller 测试修复全部通过 |
+| CP-3 | 06-07 | Sprint 3 完成 | 同步调度 + 缓存预热 + 技术债务清理全部完成 |
+| CP-4 | 06-11 | Sprint 4 完成 | 全链路集成测试通过 + 文档完整 + 代码已提交 |
